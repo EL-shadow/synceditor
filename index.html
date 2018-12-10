@@ -1,10 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Sync Editor</title>
+    <!--Dev jquery-->
+    <!--<script src="https://yastatic.net/jquery/3.3.1/jquery.js"></script>-->
+    <script>window.jQuery || document.write('<script src="node_modules/jquery/dist/jquery.js"><\/script>');</script>
+    <!--Prod jquery-->
+    <!--<script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>-->
+    <!--<script>window.jQuery || document.write('<script src="node_modules/jquery/dist/jquery.min.js"><\/script>');</script>-->
+    <script src="js/synceditor.js"></script>
 </head>
 <body>
+<input type="text" placeholder="Введите URL" id="url"> <button id="load">Загрузить</button>
 
+<script>
+    /*
+    * https://developer.github.com/v3/repos/contents/#get-contents
+    * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/')
+    * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/')
+    * $.get('https://raw.githubusercontent.com/prosvita/QIRIMTATARTILI/master/text/halq_masallar%C4%B1/__demir_ayuv/halq_masallar%C4%B1__demir_ayuv.ru.md')
+    * */
+    var syncEditor = new SE();
+    jQuery(document).ready(function($) {
+        $('#load').on('click',function(){
+            syncEditor.load($('#url').val());
+        });
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+{
+  "name": "synceditor",
+  "version": "0.0.1",
+  "description": "Редактор для синхронизаций текстов переводов",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Elnur Kurtaliev",
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}
