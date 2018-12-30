@@ -2,18 +2,32 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Sync Editor</title>
-    <!--Dev jquery-->
-    <!--<script src="https://yastatic.net/jquery/3.3.1/jquery.js"></script>-->
-    <script>window.jQuery || document.write('<script src="node_modules/jquery/dist/jquery.js"><\/script>');</script>
-    <!--Prod jquery-->
+
+    <!--Dev-->
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/popper.js/dist/umd/popper.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.js" ></script>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">
+
+    <!--Prod-->
     <!--<script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>-->
     <!--<script>window.jQuery || document.write('<script src="node_modules/jquery/dist/jquery.min.js"><\/script>');</script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>-->
+    <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>-->
+    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">-->
+    <script defer src="https://use.fontawesome.com/releases/v5.6.1/js/all.js" integrity="sha384-R5JkiUweZpJjELPWqttAYmYM1P3SNEJRM6ecTQF05pFFtxmCO+Y1CiUhvuDzgSVZ" crossorigin="anonymous"></script>
+
     <script src="js/synceditor.js"></script>
+    <script src="components/alert-popup/alert-popup.js"></script>
+    <link rel="stylesheet" href="css/synceditor.css">
+    <link rel="stylesheet" href="components/alert-popup/alert-popup.css">
+
 </head>
 <body>
 <input type="text" placeholder="Введите URL" id="url"> <button id="load">Загрузить</button>
-
+<div id="result"></div>
 <script>
     /*
     * https://developer.github.com/v3/repos/contents/#get-contents
@@ -21,11 +35,14 @@
     * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/')
     * $.get('https://raw.githubusercontent.com/prosvita/QIRIMTATARTILI/master/text/halq_masallar%C4%B1/__demir_ayuv/halq_masallar%C4%B1__demir_ayuv.ru.md')
     * */
-    var syncEditor = new SE();
+
+
+    var se = new SE();
     jQuery(document).ready(function($) {
         $('#load').on('click',function(){
-            syncEditor.load($('#url').val());
+            se.load($('#url').val());
         });
+
     });
 </script>
 </body>

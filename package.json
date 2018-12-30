@@ -9,6 +9,8 @@
   "author": "Elnur Kurtaliev",
   "license": "MIT",
   "dependencies": {
-    "jquery": "^3.3.1"
+    "bootstrap": "^4.1.3",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.6"
   }
 }

@@ -1,0 +1,11 @@
+.alert-placeholder {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+}
+
+.alert-placeholder .close {
+    margin-left: 10px;
+    line-height: 18px;
+}
