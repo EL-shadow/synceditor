@@ -26,23 +26,16 @@
 
 </head>
 <body>
-<input type="text" placeholder="Введите URL" id="url"> <button id="load">Загрузить</button>
+<input type="text" placeholder="Введите URL" id="url"
+value="https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/">
+<button id="load">Загрузить</button>
 <div id="result"></div>
 <script>
-    /*
-    * https://developer.github.com/v3/repos/contents/#get-contents
-    * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/')
-    * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/')
-    * $.get('https://raw.githubusercontent.com/prosvita/QIRIMTATARTILI/master/text/halq_masallar%C4%B1/__demir_ayuv/halq_masallar%C4%B1__demir_ayuv.ru.md')
-    * */
+    // debug
+    var se = new SE(jQuery);
 
-
-    var se = new SE();
     jQuery(document).ready(function($) {
-        $('#load').on('click',function(){
-            se.load($('#url').val());
-        });
-
+        // var se = new SE($);
     });
 </script>
 </body>
