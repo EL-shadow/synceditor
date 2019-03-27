@@ -9,3 +9,7 @@
     margin-left: 10px;
     line-height: 18px;
 }
+
+.empty-row{
+    background-color: #ececec;
+}
