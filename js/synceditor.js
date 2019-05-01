@@ -7,7 +7,19 @@ var SE = function ($) {
     var popup = alertPopup.alert.bind(alertPopup);
     var loadButton = '#load';
     var loadUrl = '#url';
-    var result = '#result';
+
+    /**
+     * @typedef {number} SyncState
+     **/
+
+    /**
+     * @enum {SyncState}
+     */
+    var SYNC = {
+        NORMAL: 0,
+        NOT_MATCH: -1,
+        MATCH: 1
+    };
 
     /*
     * https://developer.github.com/v3/repos/contents/#get-contents
@@ -19,6 +31,8 @@ var SE = function ($) {
     this._texts = {};
 
     this._lines = [];
+
+    this._linesWordCount = [];
 
     this._longerLangLength = 0;
 
@@ -95,19 +109,72 @@ var SE = function ($) {
     this.templateEditor = function (title, text) {
         return'<h3>' + title + '</h3><textarea>' + text + '</textarea>';
     };
+
+    /**
+     * Проверяет совпадение двух строк из переводов
+     *
+     * @param {Number} lineId
+     * @returns {SyncState}
+     */
+    this.getLineSync = function (lineId) {
+        var line0 = this._lines[0][lineId];
+        var line1 = this._lines[1][lineId];
+        if (line0 === line1) {
+            return SYNC.MATCH;
+        }
+
+        /**
+         * Задаем правило что если количество слов отличается больше чем лимит то перевод не соответствует
+         * @constant
+         * @type {number}
+         */
+        var WORDS_DIFF_COUNT_LIMIT = 2;
+        var line0wordsCount = this._linesWordCount[0][lineId];
+        var line1wordsCount = this._linesWordCount[1][lineId];
+        var countDiff = line0wordsCount > line1wordsCount ?
+            line0wordsCount / line1wordsCount :
+            line1wordsCount / line0wordsCount;
+        if (countDiff >= WORDS_DIFF_COUNT_LIMIT) {
+            return SYNC.NOT_MATCH;
+        }
+
+        return SYNC.NORMAL;
+    };
+
+    /**
+     *
+     * @param {SyncState} syncState
+     *
+     * @returns {String}
+     */
+    this.getLineSyncClassName = function (syncState) {
+        if (syncState === SYNC.MATCH) {
+            return 'line-sync-match';
+        }
+
+        if (syncState === SYNC.NOT_MATCH) {
+            return 'line-sync-not-match';
+        }
+
+        return '';
+    };
+
     this.templateEditor2 = function () {
         var length = this._longerLangLength;
         var langs = this._lines;
         var head = '';
         var body = '';
+
         for (var langId = 0; langId < langs.length; langId++) {
-            head += '<th colspan="2">' + langs[langId][0] + '</th>';
+            head += '<th colspan="2" class="column-' + langId + '">' + langs[langId][0] + '</th>';
         }
+
         for (var x = 1; x < length; x++) {
-            body += '<tr>';
+            var rowContent = '';
+            body += '';
             for (langId = 0; langId < langs.length; langId++) {
-                body += '<td>' + x + '</td>';
-                var cssClass = 'line-text';
+                rowContent += '<td class="line-num column-' + langId + '">' + x + '</td>';
+                var cssClass = 'line-text column-' + langId;
                 var content = '';
                 // var line = x - 1;
                 if (x < langs[langId].length) {
@@ -115,18 +182,25 @@ var SE = function ($) {
                 } else {
                     cssClass += ' empty-row';
                 }
-                body += '<td ' +
-                    'contenteditable="true" ' +
+                rowContent += '<td ' +
+                    'contenteditable="true" spellcheck="false"' +
                     'class="'+ cssClass + '" ' +
                     'id="lang'+ langId + 'line' + x + '" ' +
                     'data-lang-id="' + langId + '" ' +
                     'data-line="' + x + '"' +
                     '>' + content + '</td>';
             }
-            body += '</tr>';
+
+            var lineSyncMatch = this.getLineSync(x);
+            var rowClass = this.getLineSyncClassName(lineSyncMatch);
+            body +=
+                '<tr class="' + rowClass + '">' +
+                    rowContent +
+                '</tr>';
         }
+
         var table =
-            '<table class="table table-striped">' +
+            '<table class="se-table">' +
             '    <thead>' +
             '    <tr>' +
                     head +
@@ -158,6 +232,12 @@ var SE = function ($) {
         $(result).html(this.templateEditor2());
     };
 
+    this.getWordsCount = function (text) {
+        var wordDelimiter = ' ';
+
+        return text.split(wordDelimiter).length;
+    };
+
     this.parseRawTexts = function () {
         var longerLangLength = 0;
 
@@ -167,6 +247,12 @@ var SE = function ($) {
 
             return arr;
         }.bind(this));
+
+        var getWordsCount = this.getWordsCount;
+
+        this._linesWordCount = this._lines.map(function (lang){
+            return lang.map(getWordsCount);
+        });
 
         this._longerLangLength = longerLangLength;
     };
@@ -182,8 +268,12 @@ var SE = function ($) {
             Array.prototype.splice.apply(this._lines[lang], [line, 1].concat(newLines));
             this.updateLongerLangLength();
 
+            var newLinesWordCount = newLines.map(this.getWordsCount);
+            Array.prototype.splice.apply(this._linesWordCount[lang], [line, 1].concat(newLinesWordCount));
+
         } else {
             this._lines[lang][line] = newText;
+            this._linesWordCount[lang][line] = this.getWordsCount(newText);
         }
     };
 
@@ -199,6 +289,8 @@ var SE = function ($) {
             lang.splice(prevLine, 2, mergedText);
 
             this.updateLongerLangLength();
+
+            this._linesWordCount[langId].splice(prevLine, 2, this.getWordsCount(mergedText));
 
             return newCursorPos;
         }
