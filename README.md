@@ -6,3 +6,6 @@
 
 ## Деплой (в gh-pages)
 `npm run deploy`
+
+## Демо на gh-pages
+https://el-shadow.github.io/synceditor/
