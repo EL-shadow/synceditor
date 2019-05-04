@@ -2,6 +2,16 @@
  * Created by Elnur Kurtaliev on 2018-12-13.
  */
 
+(function (){
+    var script = window.document.createElement( "script" );
+    script.src = 'https://use.fontawesome.com/releases/v5.6.1/js/all.js';
+    script.defer = true;
+    script.integrity = 'sha384-R5JkiUweZpJjELPWqttAYmYM1P3SNEJRM6ecTQF05pFFtxmCO+Y1CiUhvuDzgSVZ';
+    script.crossOrigin = 'anonymous';
+
+    window.document.head.appendChild(script);
+}());
+
 var AlertPopup = function (selector) {
     var alertTime = null;
     var container;
@@ -15,25 +25,25 @@ var AlertPopup = function (selector) {
 
     this._alertTypes = {
         info: {
-            glyph: 'glyphicon-info-sign',
+            glyph: 'fa-info-circle',
             container: 'alert-info',
             text: 'Info:',
             time: 3000
         },
         danger: {
-            glyph: 'glyphicon-exclamation-sign',
+            glyph: 'fa-exclamation-triangle',
             container: 'alert-danger',
             text: 'Error:',
             time: 0
         },
         success: {
-            glyph: 'glyphicon-ok-sign',
+            glyph: 'fa-check-square',
             container: 'alert-success',
             text: 'OK:',
             time: 3000
         },
         warning: {
-            glyph: 'glyphicon-question-sign',
+            glyph: 'fa-question-circle',
             container: 'alert-warning',
             text: 'Warning',
             time: 5000
@@ -46,8 +56,8 @@ var AlertPopup = function (selector) {
         container.html(
             '<div class="alert ' + type.container + '" role="alert">' +
             '<a class="close" data-dismiss="alert">×</a>' +
-            '<span class="glyphicon ' + type.glyph + '" aria-hidden="true"></span>' +
-            '<i class="fas fa-info-circle"></i>'+
+            // '<span class="glyphicon ' + type.glyph + '" aria-hidden="true"></span>' +
+            '<i class="fas ' + type.glyph + '"></i>'+
             '<span class="sr-only">' + type.text + '</span>' +
             '<span> ' + message + '</span></div>');
 
