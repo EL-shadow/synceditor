@@ -105,6 +105,7 @@ var GitHubAPI = function ($, popup) {
      */
     this.createBranch = function (branchName, parentBranchHash) {
         var branchPath = 'refs/heads/' + this._currentUserLogin + '/' + branchName;
+        var token = this._currentToken;
 
         popup('Создается ветка для сохранения...', 'info');
         return $
@@ -112,7 +113,7 @@ var GitHubAPI = function ($, popup) {
                 method: "POST",
                 url: "https://api.github.com/repos/prosvita/QIRIMTATARTILI/git/refs",
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'token ' + this._currentToken);
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
                 },
                 data: JSON.stringify({
                     ref: branchPath,
@@ -148,13 +149,14 @@ var GitHubAPI = function ($, popup) {
             content: this.textToBase64(content),
             sha: parentCommit
         };
+        var token = this._currentToken;
 
         return $
             .ajax({
                 method: 'PUT',
                 url: filePath,
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Authorization', 'token ' + this._currentToken);
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
                 },
                 data: JSON.stringify(post)
             })
@@ -162,6 +164,34 @@ var GitHubAPI = function ($, popup) {
                 console.log('done triggered', msg)
             }).fail(function (err) {
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
+            });
+    }
+
+    /**
+     * Этот метод создает коммит с изменениями в одном файле.
+     * Возвращает jQuery promise который при успешном результате ресолвится хешом успешного коммита
+     *
+     * @param {string} content - текст который пушим
+     * @param {string} filePath - путь к файлу в который коммитим
+     * @param {string} branchName - имя будущей ветки
+     * @param {string} parentCommit - sha хеш от какого коммита вносятся изменения в файл
+     * @returns {*|PromiseLike<T>|Promise<T>}
+     */
+    this.getUser = function () {
+        var token = this._currentToken;
+
+        return $
+            .ajax({
+                method: 'GET',
+                url: 'https://api.github.com/user',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
+                }
+            })
+            .done(function (msg) {
+                console.log('done triggered', msg)
+            }).fail(function (err) {
+                popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
     }
 };

@@ -88,3 +88,8 @@ tr:hover .line-num {
 .line-sync-match .line-text {
     background-color: #e6ffed;
 }
+
+.pane-info__signed,
+.panel-info__notsigned {
+    display: none;
+}

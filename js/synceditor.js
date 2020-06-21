@@ -305,4 +305,30 @@ var SE = function ($) {
             editableCell.focus();
         }
     }.bind(this));
+
+    this.getUser = function () {
+        ghAPI
+            .getUser()
+            .done(function (userData) {
+                var userName = userData.name;
+                var login = userData.login;
+                var avatar = userData.avatar_url + '&s=48';
+                $('.pane-info__avatar').html('<img src="' + avatar + '">');
+                $('.pane-info__username').text(userName + ' (' + login + ')');
+                popup('Вы авторизованы', 'success');
+                $('.pane-info__signed').show();
+            })
+            .fail(function () {
+                $('.pane-info__notsigned').show();
+            })
+    };
+
+    // TODO: удалить - это для дебага
+    this._setToken = function (token) {
+        ghAPI._currentToken = token;
+    }
+
+    this._getGhApi = function () {
+        return ghAPI;
+    }
 };
