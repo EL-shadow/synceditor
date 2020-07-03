@@ -41,9 +41,9 @@
     <span class="pane-info__signed">
         <span class="pane-info__avatar"></span>
         <span class="pane-info__username"></span>
-        Вы авторизованы в Гитхаб.
+        <br>Вы авторизованы в Гитхабе.
     </span>
-    <span class="panel-info__notsigned">
+    <span class="pane-info__notsigned">
         Вы не авторизованы в Гитхаб, это не позволит сохранить изменения.<br>
         Войти: <a href="https://github.com/login/oauth/authorize?client_id=Iv1.4817d61ec0918a6c&scope=repo">Sign In With GitHub</a>
     </span>
@@ -53,6 +53,11 @@
            value="https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/">
     <button id="load">Загрузить</button>
 </p>
+<p class="action-pane">
+    <span>
+        <button id="saveButton">Сохранить изменения на сервер</button>
+    </span>
+</p>
 <hr>
 
 
@@ -61,7 +66,7 @@
 <script>
     // debug
     var se = new SE(jQuery);
-    se._setToken('');
+    // se._setToken('');
     se.getUser();
 
     jQuery(document).ready(function($) {

@@ -8,6 +8,7 @@ var SE = function ($) {
     var ghAPI = new GitHubAPI($, popup)
     var loadButton = '#load';
     var loadUrl = '#url';
+    var saveButton = '#saveButton';
 
     /**
      * @typedef {number} SyncState
@@ -52,6 +53,7 @@ var SE = function ($) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
                 this.render();
+                $('.action-pane').show();
             }.bind(this))
             .fail(function (message) {
                 popup(message, 'danger');
@@ -167,12 +169,6 @@ var SE = function ($) {
      * @param {Boolean} [reuseLines=false]
      */
     this.render = function(reuseLines) {
-        // вывод в textarea
-        // var textView = Object.keys(this._texts).map(function (lang) {
-        //     return this.templateEditor(lang, this._texts[lang])
-        // }.bind(this));
-        // $(result).html(textView.join('<hr>'));
-
         if (!reuseLines) {
             this.parseRawTexts();
         }
@@ -254,8 +250,32 @@ var SE = function ($) {
 
     //-----------------
 
-    $(loadButton).on('click',function(){
+    $(loadButton).on('click', function () {
         this.getTexts();
+    }.bind(this));
+
+    $(saveButton).on('click', function () {
+        var dfd = $.Deferred(),  // Master deferred
+            dfdNext = dfd;
+        var texts = this._texts;
+
+        ghAPI
+            .createBranch()
+            .then(function (branch) {
+                var branchName = branch.ref.substr('refs/heads/'.length);
+                Object.keys(texts).forEach(function (fileName) {
+                    dfdNext = dfdNext.pipe(function () {
+                        return ghAPI.pushCommit(texts[fileName], fileName, branchName);
+                    });
+                });
+                dfdNext.then(function () {
+                    popup('success')
+                }, function () {
+                    popup('fail', 'danger')
+                });
+
+                dfd.resolve();
+            });
     }.bind(this));
 
     $(document).on('keyup', '.line-text', function(e) {

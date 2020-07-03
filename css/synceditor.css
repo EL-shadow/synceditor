@@ -89,7 +89,15 @@ tr:hover .line-num {
     background-color: #e6ffed;
 }
 
+.pane-info__avatar {
+    float: left;
+    margin-right: 8px;
+}
 .pane-info__signed,
-.panel-info__notsigned {
+.pane-info__notsigned {
+    display: none;
+}
+
+.action-pane {
     display: none;
 }
