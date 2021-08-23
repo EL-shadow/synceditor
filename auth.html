@@ -10,13 +10,13 @@
             if (token.length) {
                 var tokenValue = token[0].substr(key.length);
                 localStorage.setItem('token', tokenValue);
-                window.location = '/';
+                window.location = './';
             }
         }());
     </script>
 </head>
 <body style="font-family: sans-serif; font-size: 14px; text-align: center;">
 Произошла ошибка авторизации.<br>
-Вернитесь на <a href="/">главную страничку</a>.
+Вернитесь на <a href="./">главную страничку</a>.
 </body>
 </html>
