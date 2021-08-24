@@ -16,7 +16,8 @@
                 '<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"><\/script>\n' +
                 '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">';
 
-            window.location.protocol === 'https:' ? document.write(prod) : document.write(dev);
+            document.write(prod)
+            // window.location.protocol === 'https:' ? document.write(prod) : document.write(dev);
         }());
     </script>
 
@@ -45,7 +46,7 @@
     </span>
     <span class="pane-info__notsigned">
         Вы не авторизованы в Гитхаб, это не позволит сохранить изменения.<br>
-        Войти: <a href="https://github.com/login/oauth/authorize?client_id=675cc40306abdab3ec18&scope=repo&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fsynceditor%2Fblblbl%3Fbor%3Dfoo">Sign In With GitHub</a>
+        Войти: <a href="https://github.com/login/oauth/authorize?client_id=675cc40306abdab3ec18&scope=repo&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fsynceditor%2Fcallback%3Fbor%3Dfoo">Sign In With GitHub</a>
     </span>
 </p>
 <p>
@@ -63,7 +64,34 @@
 
 <div id="result"></div>
 
+<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#authModal">
+  Launch demo modal
+</button> -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="authModalLabel">Authorization required</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Authorize this app in GitHub
+        <p style="margin-top: 20px;"><input type="checkbox" checked=""><span> Remember me</span></p>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+        <button type="button" class="btn btn-primary" onclick="githubAuth()">Authorize</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
+    var clientId = "675cc40306abdab3ec18";
+
     // debug
     var se = new SE(jQuery);
 
@@ -78,9 +106,16 @@
 
     se.getUser();
 
-    // jQuery(document).ready(function($) {
-        // var se = new SE($);
-    // });
+    jQuery(document).ready(function($) {
+        $('#authModal').modal('show')
+    });
+
+    function githubAuth() {
+        var url = new URL(window.location.toString());
+        var redirect_uri = "http://localhost:8080/synceditor/callback" + url.search + url.hash;
+        location.href = "https://github.com/login/oauth/authorize?client_id=" + clientId + "&scope=repo&redirect_uri="
+            + encodeURIComponent(redirect_uri);
+    } 
 </script>
 </body>
 </html>
