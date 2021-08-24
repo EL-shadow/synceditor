@@ -109,6 +109,9 @@
                 return
             }
 
+            $('#branch').val(url.searchParams.get('branch'));
+            $('#path').val(url.searchParams.get('path'));
+            $('#filename').val(url.searchParams.get('filename'));
             se.getUser();
             se.getTexts();
         });
