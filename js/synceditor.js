@@ -304,23 +304,23 @@ var SE = function ($, config) {
             dfdNext = dfd;
         var texts = this._texts;
 
-        ghAPI
-            .createBranch()
-            .then(function (branch) {
-                var branchName = branch.ref.substr('refs/heads/'.length);
-                Object.keys(texts).forEach(function (fileName) {
-                    dfdNext = dfdNext.pipe(function () {
-                        return ghAPI.pushCommit(texts[fileName], fileName, branchName);
-                    });
-                });
-                dfdNext.then(function () {
-                    popup('success')
-                }, function () {
-                    popup('fail', 'danger')
-                });
+        // ghAPI
+        //     .createBranch()
+        //     .then(function (branch) {
+        //         var branchName = branch.ref.substr('refs/heads/'.length);
+        //         Object.keys(texts).forEach(function (fileName) {
+        //             dfdNext = dfdNext.pipe(function () {
+        //                 return ghAPI.pushCommit(texts[fileName], fileName, branchName);
+        //             });
+        //         });
+        //         dfdNext.then(function () {
+        //             popup('success')
+        //         }, function () {
+        //             popup('fail', 'danger')
+        //         });
 
-                dfd.resolve();
-            });
+        //         dfd.resolve();
+        //     });
     }.bind(this));
 
     $(document).on('keyup', '.line-text', function(e) {

@@ -8,7 +8,7 @@
 var GitHubAPI = function ($, repo, popup) {
     this._currentToken = localStorage.getItem('token');
     this._currentUserLogin = '';
-    this._currentDoc = '';
+    // this._currentDoc = '';
     this._repo = repo;
     this._files = {
         'filename.ru.md': {
@@ -19,16 +19,16 @@ var GitHubAPI = function ($, repo, popup) {
 
     /**
      * Возвращает тексты из папки
-     * @param directoryURL
+     * @param branch
+     * @param path
+     * @param filename
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    // this.checkoutTexts = function(directoryURL){
     this.checkoutTexts = function(branch, path, filename){
         var textsLoading = $.Deferred();
         var ghAPIgetFile = this.getFile.bind(this);
 
         this
-            // .getFolderContent(directoryURL)
             .getFolderContent(branch, path, filename)
             .done(function (files) {
                 var fileNames = Object.keys(files);
@@ -66,23 +66,21 @@ var GitHubAPI = function ($, repo, popup) {
 
     /**
      * Возвращает jQuery promise и при успешном результате данные в формате имя_файла=url
-     * @param directoryURL
+     * @param branch
+     * @param path
+     * @param filename
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    // this.getFolderContent = function(directoryURL) {
     this.getFolderContent = function(branch, path, filename) {
-        var setDoc = this.setCurrentDoc.bind(this);
+        // var setDoc = this.setCurrentDoc.bind(this);
         var setFileSha = this.setFileSha.bind(this);
         var setFilePath = this.setFilePath.bind(this);
         var token = this._currentToken;
 
         popup('Загружается список переводов...', 'info');
-        // https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/
-        var url = 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch;
-        // return $.get(url)
         return $.ajax({
                 method: "GET",
-                url: url,
+                url: 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch,
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
@@ -94,15 +92,19 @@ var GitHubAPI = function ($, repo, popup) {
 
                 if (filesCount) {
                     // Сохраняем тайтл документа для названия ветки куда будем комиттить
-                    setDoc(data[0].name);
+                    // setDoc(data[0].name);
 
-                    files = data.reduce(function (acc, file) {
-                        acc[file.name] = file.download_url;
-                        setFileSha(file.name, file.sha);
-                        setFilePath(file.name, file.path);
+                    files = data
+                        .filter(function (item) {
+                            return item.type === 'file' && item.name.indexOf(filename + '.') === 0
+                        })
+                        .reduce(function (acc, file) {
+                            acc[file.name] = file.download_url;
+                            setFileSha(file.name, file.sha);
+                            setFilePath(file.name, file.path);
 
-                        return acc;
-                    }, {});
+                            return acc;
+                        }, {});
 
                     allFileNames = Object.keys(files).join('<br>');
                     popup('Найдено '+ filesCount + ':<br>' + allFileNames, 'success');
@@ -118,9 +120,9 @@ var GitHubAPI = function ($, repo, popup) {
         return $.get(fileURL);
     };
 
-    this.setCurrentDoc = function (firstFileName) {
-        this._currentDoc = firstFileName.substr(0, firstFileName.indexOf('.'));
-    };
+    // this.setCurrentDoc = function (firstFileName) {
+    //     this._currentDoc = firstFileName.substr(0, firstFileName.indexOf('.'));
+    // };
 
     this.setFileSha = function (fileName, fileSha) {
         var file = this._files[fileName] || (this._files[fileName] = {});
@@ -142,15 +144,15 @@ var GitHubAPI = function ($, repo, popup) {
         return btoa(unescape(encodeURIComponent(text)));
     }
 
-    this.getMasterBranchHash = function () {
-        return $
-            .get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/branches/master')
-            .then(function (masterBranch) {
-                return masterBranch.commit.sha;
-            }, function (err) {
-                popup('Не удалось узнать хеш мастер ветки. Ошибка:' + err, 'danger');
-            });
-    }
+    // this.getMasterBranchHash = function () {
+    //     return $
+    //         .get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/branches/master')
+    //         .then(function (masterBranch) {
+    //             return masterBranch.commit.sha;
+    //         }, function (err) {
+    //             popup('Не удалось узнать хеш мастер ветки. Ошибка:' + err, 'danger');
+    //         });
+    // }
 
     /**
      * Возвращает jQuery promise который при успешном результате ресолвится данными
@@ -159,31 +161,31 @@ var GitHubAPI = function ($, repo, popup) {
      * @param {string} parentBranchHash - sha хеш от какой ветки отводить новую ветку
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.createBranch = function () {
-        var branchPath = 'refs/heads/' + this._currentUserLogin + '/' + this._currentDoc;
-        var token = this._currentToken;
+    // this.createBranch = function () {
+    //     var branchPath = 'refs/heads/' + this._currentUserLogin + '/' + this._currentDoc;
+    //     var token = this._currentToken;
 
-        popup('Создается ветка для сохранения...', 'info');
-        return this
-            .getMasterBranchHash()
-            .then(function (parentBranchHash) {
-                return $
-                    .ajax({
-                        method: "POST",
-                        url: "https://api.github.com/repos/prosvita/QIRIMTATARTILI/git/refs",
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader('Authorization', 'token ' + token);
-                        },
-                        data: JSON.stringify({
-                            ref: branchPath,
-                            sha: parentBranchHash
-                        })
-                    })
-                    .fail(function(err) {
-                        popup('Не удалось создать ветку ' + branchPath + ' Ошибка: ' + err.responseJSON.message, 'danger');
-                    });
-            });
-    };
+    //     popup('Создается ветка для сохранения...', 'info');
+    //     return this
+    //         .getMasterBranchHash()
+    //         .then(function (parentBranchHash) {
+    //             return $
+    //                 .ajax({
+    //                     method: "POST",
+    //                     url: "https://api.github.com/repos/prosvita/QIRIMTATARTILI/git/refs",
+    //                     beforeSend: function (xhr) {
+    //                         xhr.setRequestHeader('Authorization', 'token ' + token);
+    //                     },
+    //                     data: JSON.stringify({
+    //                         ref: branchPath,
+    //                         sha: parentBranchHash
+    //                     })
+    //                 })
+    //                 .fail(function(err) {
+    //                     popup('Не удалось создать ветку ' + branchPath + ' Ошибка: ' + err.responseJSON.message, 'danger');
+    //                 });
+    //         });
+    // };
 
     /**
      * Этот метод создает коммит с изменениями в одном файле.
