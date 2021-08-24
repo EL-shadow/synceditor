@@ -45,7 +45,7 @@
     </span>
     <span class="pane-info__notsigned">
         Вы не авторизованы в Гитхаб, это не позволит сохранить изменения.<br>
-        Войти: <a href="https://github.com/login/oauth/authorize?client_id=Iv1.4817d61ec0918a6c&scope=repo">Sign In With GitHub</a>
+        Войти: <a href="https://github.com/login/oauth/authorize?client_id=675cc40306abdab3ec18&scope=repo">Sign In With GitHub</a>
     </span>
 </p>
 <p>
@@ -66,12 +66,21 @@
 <script>
     // debug
     var se = new SE(jQuery);
-    // se._setToken('');
+
+    var _url = new URL(window.location.toString());
+    var _token = _url.searchParams.get('token');
+    console.log(_url)
+
+    if (_token && _token.length) {
+        localStorage.setItem('token', _token);
+        se._setToken(_token);
+    }
+
     se.getUser();
 
-    jQuery(document).ready(function($) {
+    // jQuery(document).ready(function($) {
         // var se = new SE($);
-    });
+    // });
 </script>
 </body>
 </html>
