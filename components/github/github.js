@@ -1,13 +1,15 @@
 /**
  *
  * @param {jQuery} $
+ * @param repo
  * @param {AlertPopup.alert} popup
  * @constructor
  */
-var GitHubAPI = function ($, popup) {
+var GitHubAPI = function ($, repo, popup) {
     this._currentToken = localStorage.getItem('token');
     this._currentUserLogin = '';
     this._currentDoc = '';
+    this._repo = repo;
     this._files = {
         'filename.ru.md': {
             hash: 'dev-file-hash',
@@ -20,12 +22,14 @@ var GitHubAPI = function ($, popup) {
      * @param directoryURL
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.checkoutTexts = function(directoryURL){
+    // this.checkoutTexts = function(directoryURL){
+    this.checkoutTexts = function(branch, path, filename){
         var textsLoading = $.Deferred();
         var ghAPIgetFile = this.getFile.bind(this);
 
         this
-            .getFolderContent(directoryURL)
+            // .getFolderContent(directoryURL)
+            .getFolderContent(branch, path, filename)
             .done(function (files) {
                 var fileNames = Object.keys(files);
 
@@ -54,7 +58,7 @@ var GitHubAPI = function ($, popup) {
                 })
             })
             .fail(function () {
-                textsLoading.reject('Ошибка загрузки директории [' + directoryURL + ']');
+                textsLoading.reject('It can\'t download ' + path + '/' + filename + '.* content from "' + branch + '" branch');
             });
 
         return textsLoading.promise();
@@ -65,13 +69,24 @@ var GitHubAPI = function ($, popup) {
      * @param directoryURL
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.getFolderContent = function(directoryURL) {
+    // this.getFolderContent = function(directoryURL) {
+    this.getFolderContent = function(branch, path, filename) {
         var setDoc = this.setCurrentDoc.bind(this);
         var setFileSha = this.setFileSha.bind(this);
         var setFilePath = this.setFilePath.bind(this);
+        var token = this._currentToken;
 
         popup('Загружается список переводов...', 'info');
-        return $.get(directoryURL)
+        // https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/
+        var url = 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch;
+        // return $.get(url)
+        return $.ajax({
+                method: "GET",
+                url: url,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
+                }
+            })
             .then(function (data) {
                 var filesCount = data && data.length;
                 var files;

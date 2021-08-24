@@ -5,7 +5,7 @@
 var SE = function ($, config) {
     var alertPopup = new AlertPopup();
     var popup = alertPopup.alert.bind(alertPopup);
-    var ghAPI = new GitHubAPI($, popup)
+    var ghAPI = new GitHubAPI($, config.repo, popup)
     var loadUrl = '#url';
     var authButton = '#authButton';
     var saveButton = '#saveButton';
@@ -46,16 +46,35 @@ var SE = function ($, config) {
     this._longerLangLength = 0;
 
     this.getTexts = function() {
-        var url = $(loadUrl).val();
+        // var url = $(loadUrl).val();
 
-        if (!url) {
-            popup('Ошибка: не введен адрес для загрузки!','danger');
+        // if (!url) {
+        //     popup('Ошибка: не введен адрес для загрузки!','danger');
+        //     return;
+        // }
+
+        var branch = $(branchInput).val();
+        var path = $(pathInput).val();
+        var filename = $(filenameInput).val();
+
+        if (!branch) {
+            popup('Error: Specify a branch.', 'danger');
             return;
         }
 
+        if (!path) {
+            popup('Error: Specify a path to documents.', 'danger');
+            return;
+        }
+
+        if (!filename) {
+            popup('Error: Specify a filename of documents without extensions.', 'danger');
+            return;
+        }
 
         ghAPI
-            .checkoutTexts(url)
+            // .checkoutTexts(url)
+            .checkoutTexts(branch, path, filename)
             .done(function (filesContent) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
