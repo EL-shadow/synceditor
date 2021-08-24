@@ -5,20 +5,13 @@
     <title>SyncEditor Login</title>
     <script>
         (function(){
-            var _url = new URL(window.location.toString());
-            var _token = _url.searchParams.get('token');
-            var _location = _url.searchParams.get('location');
-            if (_token && _token.length) {
-                localStorage.setItem('token', _token);
-                window.location = _location && _location.length ? _location : './';
+            var key = 'token=';
+            var token = window.location.search.substr(1).split('&').filter(i=>i.includes(key));
+            if (token.length) {
+                var tokenValue = token[0].substr(key.length);
+                localStorage.setItem('token', tokenValue);
+                window.location = './';
             }
-            // var key = 'token=';
-            // var token = window.location.search.substr(1).split('&').filter(i=>i.includes(key));
-            // if (token.length) {
-            //     var tokenValue = token[0].substr(key.length);
-            //     localStorage.setItem('token', tokenValue);
-            //     window.location = './';
-            // }
         }());
     </script>
 </head>

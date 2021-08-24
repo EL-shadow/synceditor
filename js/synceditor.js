@@ -2,12 +2,12 @@
  * Created by Elnur Kurtaliev on 2018-12-13.
  */
 
-var SE = function ($) {
+var SE = function ($, config) {
     var alertPopup = new AlertPopup();
     var popup = alertPopup.alert.bind(alertPopup);
     var ghAPI = new GitHubAPI($, popup)
-    var loadButton = '#load';
     var loadUrl = '#url';
+    var authButton = '#authButton';
     var saveButton = '#saveButton';
 
     /**
@@ -30,6 +30,8 @@ var SE = function ($) {
     * $.get('https://raw.githubusercontent.com/prosvita/QIRIMTATARTILI/master/text/halq_masallar%C4%B1/__demir_ayuv/halq_masallar%C4%B1__demir_ayuv.ru.md')
     * */
     // https://developer.github.com/v3/repos/contents/#example-for-updating-a-file
+
+    this._config = config;
 
     this._texts = {};
 
@@ -250,9 +252,12 @@ var SE = function ($) {
 
     //-----------------
 
-    $(loadButton).on('click', function () {
-        this.getTexts();
-    }.bind(this));
+    $(authButton).on('click', function () {
+        var url = new URL(window.location.toString());
+        var redirectUri = this._config.callbackUri + "?redir=" + encodeURIComponent(url.toString());
+        location.href = "https://github.com/login/oauth/authorize?client_id=" + this._config.clientId
+            + "&scope=repo&redirect_uri=" + encodeURIComponent(redirectUri);
+    } 
 
     $(saveButton).on('click', function () {
         var dfd = $.Deferred(),  // Master deferred
@@ -332,7 +337,7 @@ var SE = function ($) {
             .done(function (userData) {
                 var userName = userData.name;
                 var login = userData.login;
-                var avatar = userData.avatar_url + '&s=48';
+                var avatar = userData.avatar_url + '&s=24';
                 $('.pane-info__avatar').html('<img src="' + avatar + '">');
                 $('.pane-info__username').text(userName + ' (' + login + ')');
                 popup('Вы авторизованы', 'success');
