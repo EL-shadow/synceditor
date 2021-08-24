@@ -45,7 +45,7 @@
 <p>
     <input type="text" placeholder="branch" id="branch">
     <input type="text" placeholder="path" id="path">
-    <input type="text" placeholder="file" id="file">
+    <input type="text" placeholder="filename" id="filename">
 
     <input type="text" placeholder="Введите URL" id="url"
            value="https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/halq_masalları/__demir_ayuv/">
@@ -95,9 +95,9 @@
             localStorage.setItem('token', token);
 
             var params = new URLSearchParams(url.search.slice(1));
-            params.delete('token')
+            params.delete('token');
 
-            window.location = url.origin + url.pathname + (params.toString().length ? "?" + params.toString() : "") + url.hash
+            window.location = url.origin + url.pathname + (params.toString().length ? "?" + params.toString() : "") + url.hash;
             return
         }
 
@@ -109,8 +109,8 @@
                 return
             }
 
-            se.getUser()
-            se.getTexts()
+            se.getUser();
+            se.getTexts();
         });
 
         return se;

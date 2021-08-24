@@ -257,7 +257,7 @@ var SE = function ($, config) {
         var redirectUri = this._config.callbackUri + "?redir=" + encodeURIComponent(url.toString());
         location.href = "https://github.com/login/oauth/authorize?client_id=" + this._config.clientId
             + "&scope=repo&redirect_uri=" + encodeURIComponent(redirectUri);
-    } 
+    }.bind(this));
 
     $(saveButton).on('click', function () {
         var dfd = $.Deferred(),  // Master deferred
