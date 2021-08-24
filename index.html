@@ -94,29 +94,12 @@
         if (token && token.length) {
             localStorage.setItem('token', token);
 
-            var params = new URLSearchParams(url.search.slice(1));
-            params.delete('token');
-
-            window.location = url.origin + url.pathname + (params.toString().length ? "?" + params.toString() : "") + url.hash;
+            url.searchParams.delete('token');
+            window.location = url.toString();
             return
         }
 
-        var se = new SE(jQuery, config);
-
-        jQuery(document).ready(function($) {
-            if (!localStorage.getItem('token')) {
-                $('#authModal').modal('show');
-                return
-            }
-
-            $('#branch').val(url.searchParams.get('branch'));
-            $('#path').val(url.searchParams.get('path'));
-            $('#filename').val(url.searchParams.get('filename'));
-            se.getUser();
-            se.getTexts();
-        });
-
-        return se;
+        return new SE(jQuery, config);
     }
 </script>
 </body>

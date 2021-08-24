@@ -9,6 +9,10 @@ var SE = function ($, config) {
     var loadUrl = '#url';
     var authButton = '#authButton';
     var saveButton = '#saveButton';
+    var authModal = '#authModal';
+    var branchInput = '#branch';
+    var pathInput = '#path';
+    var filenameInput = '#filename';
 
     /**
      * @typedef {number} SyncState
@@ -48,6 +52,7 @@ var SE = function ($, config) {
             popup('Ошибка: не введен адрес для загрузки!','danger');
             return;
         }
+
 
         ghAPI
             .checkoutTexts(url)
@@ -251,6 +256,22 @@ var SE = function ($, config) {
     };
 
     //-----------------
+
+    $(document).ready(function($) {
+        var url = new URL(window.location.toString());
+
+        if (!localStorage.getItem('token')) {
+            $(authModal).modal('show');
+            return
+        }
+
+        $(branchInput).val(url.searchParams.get('branch'));
+        $(pathInput).val(url.searchParams.get('path'));
+        $(filenameInput).val(url.searchParams.get('filename'));
+
+        this.getUser();
+        this.getTexts();
+    }.bind(this));
 
     $(authButton).on('click', function () {
         var url = new URL(window.location.toString());
