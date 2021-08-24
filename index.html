@@ -90,31 +90,45 @@
 
 
 <script>
-    var clientId = "675cc40306abdab3ec18";
+    var config = {
+        clientId: "675cc40306abdab3ec18",
+        callbackUri: "http://localhost:8080/synceditor/callback",
+    }
+    var se = init();
 
-    // debug
-    var se = new SE(jQuery);
+    function init() {
+        var url = new URL(window.location.toString());
+        var token = url.searchParams.get('token');
+        if (token && token.length) {
+            localStorage.setItem('token', token);
 
-    var _url = new URL(window.location.toString());
-    var _token = _url.searchParams.get('token');
-    console.log(_url)
+            var params = new URLSearchParams(url.search.slice(1));
+            params.delete('token')
 
-    if (_token && _token.length) {
-        localStorage.setItem('token', _token);
-        se._setToken(_token);
+            window.location = url.origin + url.pathname + (params.toString().length ? "?" + params.toString() : "") + url.hash
+            return
+        }
+
+        jQuery(document).ready(function($) {
+            if (!localStorage.getItem('token')) {
+                $('#authModal').modal('show');
+                return
+            }
+        });
+
+        return new SE(jQuery);
     }
 
-    se.getUser();
+    // debug
+    // var se = new SE(jQuery);
+    // se.getUser();
 
-    jQuery(document).ready(function($) {
-        $('#authModal').modal('show')
-    });
 
     function githubAuth() {
         var url = new URL(window.location.toString());
-        var redirect_uri = "http://localhost:8080/synceditor/callback" + url.search + url.hash;
-        location.href = "https://github.com/login/oauth/authorize?client_id=" + clientId + "&scope=repo&redirect_uri="
-            + encodeURIComponent(redirect_uri);
+        var redirectUri = config.callbackUri + "?redir=" + encodeURIComponent(url.toString());
+        location.href = "https://github.com/login/oauth/authorize?client_id=" + config.clientId + "&scope=repo&redirect_uri="
+            + encodeURIComponent(redirectUri);
     } 
 </script>
 </body>
