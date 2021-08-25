@@ -39,6 +39,7 @@ var GitHubAPI = function ($, repo, popup) {
                 $.when.apply($, fileNames.map(function (fileName) {
                     var fileUrl = files[fileName];
 
+console.log(fileName, fileUrl)
                     return ghAPIgetFile(fileUrl);
                 })).done(function () {
                     if (fileNames.length !== arguments.length) {
@@ -107,13 +108,14 @@ var GitHubAPI = function ($, repo, popup) {
                             acc[file.name] = file.download_url;
                             setFileSha(file.name, file.sha);
                             setFilePath(file.name, file.path);
-
+console.log('[', acc, ']');
                             return acc;
                         }, {});
 
                     allFileNames = Object.keys(files).join('<br>');
                     popup('Найдено '+ filesCount + ':<br>' + allFileNames, 'success');
 
+console.log(files);
                     return files;
                 }
             }, function () {
