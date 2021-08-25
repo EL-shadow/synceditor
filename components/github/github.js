@@ -82,7 +82,7 @@ var GitHubAPI = function ($, repo, popup) {
                 method: "GET",
                 url: 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch,
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                    // xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
