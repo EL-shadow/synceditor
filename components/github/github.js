@@ -7,7 +7,9 @@
  */
 var GitHubAPI = function ($, repo, popup) {
     this._currentToken = localStorage.getItem('token');
-    this._currentUserLogin = '';
+    this._currentUserEmail = null;
+    this._currentUserName = null;
+    // this._currentUserLogin = '';
     // this._currentDoc = '';
     this._repo = repo;
     this._files = {
@@ -120,13 +122,14 @@ var GitHubAPI = function ($, repo, popup) {
     };
 
     this.getFile = function(fileURL) {
-        return $.get(fileURL);
+        // return $.get(fileURL);
         var token = this._currentToken;
 
         return $.ajax({
             method: "GET",
             url: fileURL,
             beforeSend: function (xhr) {
+                xhr.setRequestHeader('Accept', null);
                 xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                 xhr.setRequestHeader('Authorization', 'token ' + token);
             }
@@ -213,10 +216,10 @@ var GitHubAPI = function ($, repo, popup) {
     this.pushCommit = function (content, fileName, branchName) {
         var fileSha = this._files[fileName].sha;
         var post = {
-            message: 'test github api',
+            message: 'Sync ' + fileName,
             committer: {
-                name: 'Elnur Kurtaliev',
-                email: 'el92@yandex.ru'
+                name: this._currentUserName,
+                email: this._currentUserEmail
             },
             branch: branchName,
             content: this.textToBase64(content),
@@ -231,6 +234,7 @@ var GitHubAPI = function ($, repo, popup) {
                 method: 'PUT',
                 url: 'https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/' + filePath,
                 beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', null);
                     xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 },
@@ -257,12 +261,13 @@ var GitHubAPI = function ($, repo, popup) {
                 method: 'GET',
                 url: 'https://api.github.com/user',
                 beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', null);
                     xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
             .done(function (userData) {
-                this._currentUserLogin = userData.login;
+                // this._currentUserLogin = userData.login;
                 this._currentUserEmail = userData.email;
                 this._currentUserName = userData.name;
 console.log(userData);
