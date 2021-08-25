@@ -118,7 +118,7 @@ var GitHubAPI = function ($, repo, popup) {
     };
 
     this.getFile = function(fileURL) {
-        // return $.get(fileURL);
+        return $.get(fileURL);
         var token = this._currentToken;
 
         return $.ajax({
@@ -260,9 +260,12 @@ var GitHubAPI = function ($, repo, popup) {
             })
             .done(function (userData) {
                 this._currentUserLogin = userData.login;
+                this._currentUserEmail = userData.email;
+                this._currentUserName = userData.name;
 console.log(userData);
             }.bind(this)).fail(function (err) {
                 popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
     }
 };
+
