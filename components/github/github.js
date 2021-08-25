@@ -122,7 +122,7 @@ var GitHubAPI = function ($, repo, popup) {
     };
 
     this.getFile = function(fileURL) {
-        return $.get(fileURL);
+        // return $.get(fileURL);
         var token = this._currentToken;
 console.log(fileURL, token);
         return $.ajax({
