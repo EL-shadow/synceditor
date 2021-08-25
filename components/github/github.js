@@ -82,6 +82,7 @@ var GitHubAPI = function ($, repo, popup) {
                 method: "GET",
                 url: 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch,
                 beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
@@ -117,7 +118,17 @@ var GitHubAPI = function ($, repo, popup) {
     };
 
     this.getFile = function(fileURL) {
-        return $.get(fileURL);
+        // return $.get(fileURL);
+        var token = this._currentToken;
+
+        return $.ajax({
+            method: "GET",
+            url: fileURL,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                xhr.setRequestHeader('Authorization', 'token ' + token);
+            }
+        });
     };
 
     // this.setCurrentDoc = function (firstFileName) {
@@ -217,6 +228,7 @@ var GitHubAPI = function ($, repo, popup) {
                 method: 'PUT',
                 url: 'https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/' + filePath,
                 beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 },
                 data: JSON.stringify(post)
@@ -242,11 +254,13 @@ var GitHubAPI = function ($, repo, popup) {
                 method: 'GET',
                 url: 'https://api.github.com/user',
                 beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
             .done(function (userData) {
                 this._currentUserLogin = userData.login;
+console.log(userData);
             }.bind(this)).fail(function (err) {
                 popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
