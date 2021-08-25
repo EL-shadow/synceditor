@@ -124,13 +124,13 @@ var GitHubAPI = function ($, repo, popup) {
     this.getFile = function(fileURL) {
         // return $.get(fileURL);
         var token = this._currentToken;
-
+console.log(fileURL, token);
         return $.ajax({
             method: "GET",
             url: fileURL,
             beforeSend: function (xhr) {
-                xhr.setRequestHeader('Accept', null);
-                xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                // xhr.setRequestHeader('Accept', null);
+                // xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                 xhr.setRequestHeader('Authorization', 'token ' + token);
             }
         });
@@ -270,7 +270,6 @@ var GitHubAPI = function ($, repo, popup) {
                 // this._currentUserLogin = userData.login;
                 this._currentUserEmail = userData.email;
                 this._currentUserName = userData.name;
-console.log(userData);
             }.bind(this)).fail(function (err) {
                 popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
