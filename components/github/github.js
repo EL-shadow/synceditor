@@ -126,13 +126,13 @@ console.log(files);
     this.getFile = function(fileURL) {
         // return $.get(fileURL);
         var token = this._currentToken;
-console.log(fileURL, token);
+console.log('>>>', fileURL, '|||', token, '<<<');
         return $.ajax({
             method: "GET",
             url: fileURL,
             beforeSend: function (xhr) {
-                // xhr.setRequestHeader('Accept', null);
-                // xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                xhr.setRequestHeader('Accept', null);
+                xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
                 xhr.setRequestHeader('Authorization', 'token ' + token);
             }
         });
