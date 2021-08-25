@@ -131,9 +131,12 @@ console.log('>>>', fileURL, '|||', token, '<<<');
             method: "GET",
             url: fileURL,
             crossDomain: true,
+            xhrFields: {
+                withCredentials: true
+            },
             beforeSend: function (xhr) {
-                xhr.setRequestHeader('Accept', null);
-                xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
+                // xhr.setRequestHeader('Accept', null);
+                // xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
                 xhr.setRequestHeader('Authorization', 'token ' + token);
             }
         });
