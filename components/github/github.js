@@ -78,11 +78,13 @@ var GitHubAPI = function ($, repo, popup) {
         var token = this._currentToken;
 
         popup('Загружается список переводов...', 'info');
+        // https://docs.github.com/en/rest/reference/repos#get-repository-content
         return $.ajax({
                 method: "GET",
                 url: 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch,
                 beforeSend: function (xhr) {
-                    // xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                    xhr.setRequestHeader('Accept', null);
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
@@ -223,6 +225,7 @@ var GitHubAPI = function ($, repo, popup) {
         var token = this._currentToken;
         var filePath = this._files[fileName].path;
 
+        // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
         return $
             .ajax({
                 method: 'PUT',
