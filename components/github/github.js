@@ -130,6 +130,7 @@ console.log('>>>', fileURL, '|||', token, '<<<');
         return $.ajax({
             method: "GET",
             url: fileURL,
+            crossDomain: true,
             beforeSend: function (xhr) {
                 xhr.setRequestHeader('Accept', null);
                 xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
