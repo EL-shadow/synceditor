@@ -304,22 +304,24 @@ var SE = function ($, config) {
             dfdNext = dfd;
         var texts = this._texts;
 
+        var url = new URL(window.location.toString());
+        var branchName = url.searchParams.get('branch');
         // ghAPI
         //     .createBranch()
         //     .then(function (branch) {
         //         var branchName = branch.ref.substr('refs/heads/'.length);
-        //         Object.keys(texts).forEach(function (fileName) {
-        //             dfdNext = dfdNext.pipe(function () {
-        //                 return ghAPI.pushCommit(texts[fileName], fileName, branchName);
-        //             });
-        //         });
-        //         dfdNext.then(function () {
-        //             popup('success')
-        //         }, function () {
-        //             popup('fail', 'danger')
-        //         });
+                Object.keys(texts).forEach(function (fileName) {
+                    dfdNext = dfdNext.pipe(function () {
+                        return ghAPI.pushCommit(texts[fileName], fileName, branchName);
+                    });
+                });
+                dfdNext.then(function () {
+                    popup('success')
+                }, function () {
+                    popup('fail', 'danger')
+                });
 
-        //         dfd.resolve();
+                dfd.resolve();
         //     });
     }.bind(this));
 

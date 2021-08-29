@@ -7,8 +7,8 @@
  */
 var GitHubAPI = function ($, repo, popup) {
     this._currentToken = localStorage.getItem('token');
-    this._currentUserEmail = null;
-    this._currentUserName = null;
+    // this._currentUserEmail = null;
+    // this._currentUserName = null;
     // this._currentUserLogin = '';
     // this._currentDoc = '';
     this._repo = repo;
@@ -128,33 +128,6 @@ console.log(files);
         var token = this._currentToken;
         url.password = token;
         return $.get(url.toString());
-
-        // var token = this._currentToken;
-        // var headers = new Headers();
-        // headers.append('Accept','text/plain; charset=UTF-8');
-        // // headers.append('Authorization', 'token ' + token);
-        // return fetch(fileURL, headers)
-        //     .then(function (response) {
-        //         // var data = response.text();
-        //         // console,log('LLLLLLLLLLL', data.length);
-        //         // return data;
-        //         return response.text();
-        //     });
-//         var token = this._currentToken;
-// console.log('>>>', fileURL, '|||', token, '<<<');
-//         return $.ajax({
-//             url: fileURL,
-//             xhrFields: {
-//                 withCredentials: true
-//             },
-//             crossDomain: true,
-//             dataType: 'text',
-//             beforeSend: function (xhr) {
-//                 xhr.setRequestHeader('Accept', null);
-//                 xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
-//                 xhr.setRequestHeader('Authorization', 'token ' + token);
-//             }
-//         });
     };
 
     // this.setCurrentDoc = function (firstFileName) {
@@ -238,10 +211,10 @@ console.log(files);
         var fileSha = this._files[fileName].sha;
         var post = {
             message: 'Sync ' + fileName,
-            committer: {
-                name: this._currentUserName,
-                email: this._currentUserEmail
-            },
+            // committer: {
+            //     name: this._currentUserName,
+            //     email: this._currentUserEmail
+            // },
             branch: branchName,
             content: this.textToBase64(content),
             sha: fileSha
@@ -287,11 +260,12 @@ console.log(files);
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
-            .done(function (userData) {
-                // this._currentUserLogin = userData.login;
-                this._currentUserEmail = userData.email;
-                this._currentUserName = userData.name;
-            }.bind(this)).fail(function (err) {
+            // .done(function (userData) {
+            //     // this._currentUserLogin = userData.login;
+            //     this._currentUserEmail = userData.email;
+            //     this._currentUserName = userData.name;
+            // }.bind(this))
+            .fail(function (err) {
                 popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
     }
