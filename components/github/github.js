@@ -135,7 +135,7 @@ console.log('>>>', fileURL, '|||', token, '<<<');
             //     withCredentials: true
             // },
             crossDomain: true,
-            dataType: 'text',
+            dataType: 'jsonp',
             beforeSend: function (xhr) {
                 // xhr.setRequestHeader('Accept', null);
                 // xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
