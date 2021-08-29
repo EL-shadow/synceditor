@@ -129,7 +129,7 @@ console.log(files);
         var token = this._currentToken;
         var headers = new Headers();
         headers.append('Accept','text/plain; charset=UTF-8');
-        headers.append('Authorization', 'token ' + token);
+        // headers.append('Authorization', 'token ' + token);
         return fetch(fileURL, headers)
             .then(function (response) {
                 // var data = response.text();
