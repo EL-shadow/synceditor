@@ -135,10 +135,10 @@ console.log('>>>', fileURL, '|||', token, '<<<');
             //     withCredentials: true
             // },
             crossDomain: true,
-            dataType: 'jsonp',
+            dataType: 'text',
             beforeSend: function (xhr) {
-                // xhr.setRequestHeader('Accept', null);
-                // xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
+                xhr.setRequestHeader('Accept', null);
+                xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
                 xhr.setRequestHeader('Authorization', 'token ' + token);
             }
         });
