@@ -125,16 +125,17 @@ console.log(files);
 
     this.getFile = function(fileURL) {
         // return $.get(fileURL);
+
         var token = this._currentToken;
         var headers = new Headers();
         headers.append('Accept','text/plain; charset=UTF-8');
         headers.append('Authorization', 'token ' + token);
         return fetch(fileURL, headers)
             .then(function (response) {
-                var data = response.text();
-                console,log('LLLLLLLLLLL', data.length);
-                return data;
-                // return response.text();
+                // var data = response.text();
+                // console,log('LLLLLLLLLLL', data.length);
+                // return data;
+                return response.text();
             });
 //         var token = this._currentToken;
 // console.log('>>>', fileURL, '|||', token, '<<<');
