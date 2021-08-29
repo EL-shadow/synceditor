@@ -124,7 +124,7 @@ console.log(files);
     };
 
     this.getFile = function(fileURL) {
-        // return $.get(fileURL);
+        return $.get(fileURL);
         return fetch(fileURL)
             .then(function (response) {
                 return response.text();
