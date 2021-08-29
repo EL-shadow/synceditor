@@ -131,7 +131,10 @@ console.log(files);
         headers.append('Authorization', 'token ' + token);
         return fetch(fileURL, headers)
             .then(function (response) {
-                return response.text();
+                var data = response.text();
+                console,log('LLLLLLLLLLL', data.length);
+                return data;
+                // return response.text();
             });
 //         var token = this._currentToken;
 // console.log('>>>', fileURL, '|||', token, '<<<');
