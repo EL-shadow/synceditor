@@ -127,8 +127,7 @@ console.log(files);
         var url = new URL(fileURL);
         var token = this._currentToken;
         url.password = token;
-console.log('>>>', url.toString(), '|||', token, '<<<');
-        return $.get(fileURL);
+        return $.get(url.toString());
 
         // var token = this._currentToken;
         // var headers = new Headers();
