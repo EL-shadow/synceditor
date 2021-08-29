@@ -124,26 +124,30 @@ console.log(files);
     };
 
     this.getFile = function(fileURL) {
-        return $.get(fileURL);
-        return fetch(fileURL)
+        // return $.get(fileURL);
+        var token = this._currentToken;
+        var headers = new Headers();
+        headers.append('Accept','text/plain; charset=UTF-8');
+        headers.append('Authorization', 'token ' + token);
+        return fetch(fileURL, headers)
             .then(function (response) {
                 return response.text();
             });
-        var token = this._currentToken;
-console.log('>>>', fileURL, '|||', token, '<<<');
-        return $.ajax({
-            url: fileURL,
-            xhrFields: {
-                withCredentials: true
-            },
-            crossDomain: true,
-            dataType: 'text',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader('Accept', null);
-                xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
-                xhr.setRequestHeader('Authorization', 'token ' + token);
-            }
-        });
+//         var token = this._currentToken;
+// console.log('>>>', fileURL, '|||', token, '<<<');
+//         return $.ajax({
+//             url: fileURL,
+//             xhrFields: {
+//                 withCredentials: true
+//             },
+//             crossDomain: true,
+//             dataType: 'text',
+//             beforeSend: function (xhr) {
+//                 xhr.setRequestHeader('Accept', null);
+//                 xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
+//                 xhr.setRequestHeader('Authorization', 'token ' + token);
+//             }
+//         });
     };
 
     // this.setCurrentDoc = function (firstFileName) {
