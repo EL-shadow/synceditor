@@ -128,13 +128,14 @@ console.log(files);
         var token = this._currentToken;
 console.log('>>>', fileURL, '|||', token, '<<<');
         return $.ajax({
-            method: "GET",
+            // method: "GET",
             url: fileURL,
             // crossDomain: true,
             // xhrFields: {
             //     withCredentials: true
             // },
-            dataType: "text",
+            crossDomain: true,
+            dataType: 'text',
             beforeSend: function (xhr) {
                 // xhr.setRequestHeader('Accept', null);
                 // xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
