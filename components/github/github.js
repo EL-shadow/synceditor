@@ -125,23 +125,24 @@ console.log(files);
 
     this.getFile = function(fileURL) {
         // return $.get(fileURL);
-        var token = this._currentToken;
-console.log('>>>', fileURL, '|||', token, '<<<');
-        return $.ajax({
-            // method: "GET",
-            url: fileURL,
-            // crossDomain: true,
-            // xhrFields: {
-            //     withCredentials: true
-            // },
-            crossDomain: true,
-            dataType: 'jsonp',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader('Accept', null);
-                xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
-                xhr.setRequestHeader('Authorization', 'token ' + token);
-            }
-        });
+        return $.load(fileURL);
+//         var token = this._currentToken;
+// console.log('>>>', fileURL, '|||', token, '<<<');
+//         return $.ajax({
+//             // method: "GET",
+//             url: fileURL,
+//             // crossDomain: true,
+//             // xhrFields: {
+//             //     withCredentials: true
+//             // },
+//             crossDomain: true,
+//             dataType: 'jsonp',
+//             beforeSend: function (xhr) {
+//                 xhr.setRequestHeader('Accept', null);
+//                 xhr.setRequestHeader('Accept', 'text/plain; charset=utf-8');
+//                 xhr.setRequestHeader('Authorization', 'token ' + token);
+//             }
+//         });
     };
 
     // this.setCurrentDoc = function (firstFileName) {
