@@ -150,6 +150,7 @@ var GitHubAPI = function ($, repo, popup) {
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
     this.pushCommit = function (content, fileName, branchName) {
+        var that = this;
         var fileSha = this._files[fileName].sha;
         var post = {
             message: 'Sync ' + fileName,
@@ -164,7 +165,7 @@ var GitHubAPI = function ($, repo, popup) {
         return $
             .ajax({
                 method: 'PUT',
-                url: 'https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/' + filePath,
+                url: 'https://api.github.com/repos/' + that._repo + '/contents/' + filePath,
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader('Accept', null);
                     xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
@@ -172,10 +173,26 @@ var GitHubAPI = function ($, repo, popup) {
                 },
                 data: JSON.stringify(post)
             })
-            .done(function (msg) {
+            .then(function (msg) {
                 console.log('done triggered', msg);
-            }).fail(function (err) {
+                return $.ajax({
+                    method: "GET",
+                    url: 'https://api.github.com/repos/' + that._repo + '/contents/' + filePath + '?ref=' + branchName,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Accept', null);
+                        xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                        xhr.setRequestHeader('Authorization', 'token ' + token);
+                    }
+                })
+            }, function (err) {
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
+            })
+            .then(function (data) {
+                console.log('>>>>', data);
+                that.setFileSha(fileName, data[0].sha);
+            }, function () {
+                popup('Failed to load ' + url, 'danger');
+
             });
     }
 
