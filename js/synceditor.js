@@ -46,16 +46,9 @@ var SE = function ($, config) {
     this._longerLangLength = 0;
 
     this.getTexts = function() {
-        // var url = $(loadUrl).val();
-
-        // if (!url) {
-        //     popup('Ошибка: не введен адрес для загрузки!','danger');
-        //     return;
-        // }
-
         var branch = $(branchInput).val();
         var path = $(pathInput).val();
-        var filename = $(filenameInput).val();
+        var baseFileName = $(filenameInput).val();
 
         if (!branch) {
             popup('Error: Specify a branch.', 'danger');
@@ -67,14 +60,13 @@ var SE = function ($, config) {
             return;
         }
 
-        if (!filename) {
+        if (!baseFileName) {
             popup('Error: Specify a filename of documents without extensions.', 'danger');
             return;
         }
 
         ghAPI
-            // .checkoutTexts(url)
-            .checkoutTexts(branch, path, filename)
+            .checkoutTexts(branch, path, baseFileName)
             .done(function (filesContent) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
@@ -211,8 +203,8 @@ var SE = function ($, config) {
     this.parseRawTexts = function () {
         var longerLangLength = 0;
 
-        this._lines = Object.keys(this._texts).map(function (lang) {
-            var arr = [lang].concat(this._texts[lang].split('\n'));
+        this._lines = Object.keys(this._texts).map(function (fileName) {
+            var arr = [fileName].concat(this._texts[fileName].split('\n'));
             longerLangLength = arr.length > longerLangLength ? arr.length : longerLangLength;
 
             return arr;
@@ -225,6 +217,29 @@ var SE = function ($, config) {
         });
 
         this._longerLangLength = longerLangLength;
+    };
+
+    this.linesToText = function (fileName) {
+        var lines = null;
+
+        for (let i = 0; i < this._lines; i++) {
+            if (this._lines[i][0] === fileName) {
+                lines = this._lines[i].slice(1);
+                break;
+            }
+        }
+        if (lines === null) {
+            return false;
+        }
+
+        var text = lines.join('\n');
+
+        if (text.localeCompare(this._texts[fileName]) !== 0) {
+            this._texts[fileName] = text;
+            return true;
+        }
+
+        return false;
     };
 
     this.updateLine = function(lang, line, newText) {
@@ -300,29 +315,29 @@ var SE = function ($, config) {
     }.bind(this));
 
     $(saveButton).on('click', function () {
+        var that = this;
         var dfd = $.Deferred(),  // Master deferred
             dfdNext = dfd;
-        var texts = this._texts;
 
         var url = new URL(window.location.toString());
         var branchName = url.searchParams.get('branch');
-        // ghAPI
-        //     .createBranch()
-        //     .then(function (branch) {
-        //         var branchName = branch.ref.substr('refs/heads/'.length);
-                Object.keys(texts).forEach(function (fileName) {
-                    dfdNext = dfdNext.pipe(function () {
-                        return ghAPI.pushCommit(texts[fileName], fileName, branchName);
-                    });
-                });
-                dfdNext.then(function () {
-                    popup('success')
-                }, function () {
-                    popup('fail', 'danger')
-                });
 
-                dfd.resolve();
-        //     });
+        Object.keys(that._texts).forEach(function (fileName) {
+            dfdNext = dfdNext.pipe(function () {
+                var changed = that.linesToText(fileName);
+                if (!changed) {
+                    return Promise.resolve();
+                }
+                return ghAPI.pushCommit(that._texts[fileName], fileName, branchName);
+            });
+        });
+        dfdNext.then(function () {
+            popup('success')
+        }, function () {
+            popup('fail', 'danger')
+        });
+
+        dfd.resolve();
     }.bind(this));
 
     $(document).on('keyup', '.line-text', function(e) {
@@ -393,6 +408,10 @@ var SE = function ($, config) {
     // TODO: удалить - это для дебага
     this._setToken = function (token) {
         ghAPI._currentToken = token;
+    }
+
+    this._getToken = function () {
+        return ghAPI._currentToken;
     }
 
     this._getGhApi = function () {
