@@ -65,7 +65,7 @@ var SE = function ($, config) {
             return;
         }
 
-        ghAPI
+        return ghAPI
             .checkoutTexts(branch, path, baseFileName)
             .done(function (filesContent) {
                 this._texts = filesContent;
