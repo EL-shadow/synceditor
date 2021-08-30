@@ -71,7 +71,7 @@ var SE = function ($, config) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
                 this.render();
-                $('.action-save').show();
+                $('.action-pane').show();
             }.bind(this))
             .fail(function (message) {
                 popup(message, 'danger');

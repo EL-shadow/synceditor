@@ -7,10 +7,6 @@
  */
 var GitHubAPI = function ($, repo, popup) {
     this._currentToken = localStorage.getItem('token');
-    // this._currentUserEmail = null;
-    // this._currentUserName = null;
-    // this._currentUserLogin = '';
-    // this._currentDoc = '';
     this._repo = repo;
     this._files = {
         'filename.ru.md': {
@@ -39,7 +35,6 @@ var GitHubAPI = function ($, repo, popup) {
                 $.when.apply($, fileNames.map(function (fileName) {
                     var fileUrl = files[fileName];
 
-console.log(fileName, fileUrl)
                     return ghAPIgetFile(fileUrl);
                 })).done(function () {
                     if (fileNames.length !== arguments.length) {
@@ -75,7 +70,6 @@ console.log(fileName, fileUrl)
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
     this.getFolderContent = function(branch, path, filename) {
-        // var setDoc = this.setCurrentDoc.bind(this);
         var setFileSha = this.setFileSha.bind(this);
         var setFilePath = this.setFilePath.bind(this);
         var token = this._currentToken;
@@ -97,9 +91,6 @@ console.log(fileName, fileUrl)
                 var allFileNames;
 
                 if (filesCount) {
-                    // Сохраняем тайтл документа для названия ветки куда будем комиттить
-                    // setDoc(data[0].name);
-
                     files = data
                         .filter(function (item) {
                             return item.type === 'file' && item.name.indexOf(filename + '.') === 0
@@ -108,14 +99,12 @@ console.log(fileName, fileUrl)
                             acc[file.name] = file.download_url;
                             setFileSha(file.name, file.sha);
                             setFilePath(file.name, file.path);
-console.log('[', acc, ']');
                             return acc;
                         }, {});
 
                     allFileNames = Object.keys(files).join('<br>');
                     popup('Найдено '+ filesCount + ':<br>' + allFileNames, 'success');
 
-console.log(files);
                     return files;
                 }
             }, function () {
@@ -129,10 +118,6 @@ console.log(files);
         url.password = token;
         return $.get(url.toString());
     };
-
-    // this.setCurrentDoc = function (firstFileName) {
-    //     this._currentDoc = firstFileName.substr(0, firstFileName.indexOf('.'));
-    // };
 
     this.setFileSha = function (fileName, fileSha) {
         var file = this._files[fileName] || (this._files[fileName] = {});
@@ -154,49 +139,6 @@ console.log(files);
         return btoa(unescape(encodeURIComponent(text)));
     }
 
-    // this.getMasterBranchHash = function () {
-    //     return $
-    //         .get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/branches/master')
-    //         .then(function (masterBranch) {
-    //             return masterBranch.commit.sha;
-    //         }, function (err) {
-    //             popup('Не удалось узнать хеш мастер ветки. Ошибка:' + err, 'danger');
-    //         });
-    // }
-
-    /**
-     * Возвращает jQuery promise который при успешном результате ресолвится данными
-     *
-     * @param {string} branchName - имя будущей ветки
-     * @param {string} parentBranchHash - sha хеш от какой ветки отводить новую ветку
-     * @returns {*|PromiseLike<T>|Promise<T>}
-     */
-    // this.createBranch = function () {
-    //     var branchPath = 'refs/heads/' + this._currentUserLogin + '/' + this._currentDoc;
-    //     var token = this._currentToken;
-
-    //     popup('Создается ветка для сохранения...', 'info');
-    //     return this
-    //         .getMasterBranchHash()
-    //         .then(function (parentBranchHash) {
-    //             return $
-    //                 .ajax({
-    //                     method: "POST",
-    //                     url: "https://api.github.com/repos/prosvita/QIRIMTATARTILI/git/refs",
-    //                     beforeSend: function (xhr) {
-    //                         xhr.setRequestHeader('Authorization', 'token ' + token);
-    //                     },
-    //                     data: JSON.stringify({
-    //                         ref: branchPath,
-    //                         sha: parentBranchHash
-    //                     })
-    //                 })
-    //                 .fail(function(err) {
-    //                     popup('Не удалось создать ветку ' + branchPath + ' Ошибка: ' + err.responseJSON.message, 'danger');
-    //                 });
-    //         });
-    // };
-
     /**
      * Этот метод создает коммит с изменениями в одном файле.
      * Возвращает jQuery promise который при успешном результате ресолвится хешом успешного коммита
@@ -211,10 +153,6 @@ console.log(files);
         var fileSha = this._files[fileName].sha;
         var post = {
             message: 'Sync ' + fileName,
-            // committer: {
-            //     name: this._currentUserName,
-            //     email: this._currentUserEmail
-            // },
             branch: branchName,
             content: this.textToBase64(content),
             sha: fileSha
@@ -260,14 +198,8 @@ console.log(files);
                     xhr.setRequestHeader('Authorization', 'token ' + token);
                 }
             })
-            // .done(function (userData) {
-            //     // this._currentUserLogin = userData.login;
-            //     this._currentUserEmail = userData.email;
-            //     this._currentUserName = userData.name;
-            // }.bind(this))
             .fail(function (err) {
                 popup('Не удалось получить данные пользователя.<br>Ошибка: [' + err.responseJSON.message + ']', 'danger');
             });
     }
 };
-
