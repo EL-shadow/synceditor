@@ -150,7 +150,6 @@ var GitHubAPI = function ($, repo, popup) {
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
     this.pushCommit = function (content, fileName, branchName) {
-        var setFileSha = this.setFileSha.bind(this);
         var fileSha = this._files[fileName].sha;
         var post = {
             message: 'Sync ' + fileName,
@@ -175,7 +174,6 @@ var GitHubAPI = function ($, repo, popup) {
             })
             .done(function (msg) {
                 console.log('done triggered', msg);
-                setFileSha(fileName, msg.commit.sha);
             }).fail(function (err) {
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             });
