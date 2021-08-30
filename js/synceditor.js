@@ -322,8 +322,6 @@ var SE = function ($, config) {
 
         var url = new URL(window.location.toString());
         var branchName = url.searchParams.get('branch');
-        var filePath = url.searchParams.get('path');
-        var baseFileName = url.searchParams.get('filename');
 
         Object.keys(that._texts).forEach(function (fileName) {
             dfdNext = dfdNext.pipe(function () {
@@ -335,9 +333,11 @@ var SE = function ($, config) {
             });
         });
         dfdNext.then(function () {
-            ghAPI.getFolderContent(branchName, filePath, baseFileName);
             popup('success');
-            $(saveButton).prop('disabled', false);
+            that.getTexts()
+                .done(function () {
+                    $(saveButton).prop('disabled', false);
+                });
         }, function () {
             popup('fail', 'danger');
             $(saveButton).prop('disabled', false);
