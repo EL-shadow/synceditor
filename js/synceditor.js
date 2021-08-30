@@ -71,7 +71,7 @@ var SE = function ($, config) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
                 this.render();
-                $('.action-pane').show();
+                $('.action-save').show();
             }.bind(this))
             .fail(function (message) {
                 popup(message, 'danger');
@@ -314,6 +314,8 @@ var SE = function ($, config) {
     }.bind(this));
 
     $(saveButton).on('click', function () {
+        $(saveButton).prop('disabled', true);
+
         var that = this;
         var dfd = $.Deferred(),  // Master deferred
             dfdNext = dfd;
@@ -331,9 +333,11 @@ var SE = function ($, config) {
             });
         });
         dfdNext.then(function () {
-            popup('success')
+            popup('success');
+            $(saveButton).prop('disabled', false);
         }, function () {
-            popup('fail', 'danger')
+            popup('fail', 'danger');
+            $(saveButton).prop('disabled', false);
         });
 
         dfd.resolve();
