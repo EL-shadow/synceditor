@@ -188,11 +188,9 @@ var GitHubAPI = function ($, repo, popup) {
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             })
             .then(function (data) {
-                console.log('>>>>', data);
                 that.setFileSha(fileName, data.sha);
             }, function () {
                 popup('Failed to load ' + url, 'danger');
-
             });
     }
 

@@ -334,9 +334,6 @@ var SE = function ($, config) {
         });
         dfdNext.then(function () {
             popup('success');
-            // that.getTexts()
-            //     .done(function () {
-            //     });
             $(saveButton).prop('disabled', false);
         }, function () {
             popup('fail', 'danger');
