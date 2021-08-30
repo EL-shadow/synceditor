@@ -222,7 +222,7 @@ var SE = function ($, config) {
     this.linesToText = function (fileName) {
         var lines = null;
 
-        for (let i = 0; i < this._lines; i++) {
+        for (let i = 0; i < this._lines.length; i++) {
             if (this._lines[i][0] === fileName) {
                 lines = this._lines[i].slice(1);
                 break;
@@ -233,7 +233,6 @@ var SE = function ($, config) {
         }
 
         var text = lines.join('\n');
-
         if (text.localeCompare(this._texts[fileName]) !== 0) {
             this._texts[fileName] = text;
             return true;
