@@ -173,7 +173,8 @@ var GitHubAPI = function ($, repo, popup) {
                 data: JSON.stringify(post)
             })
             .done(function (msg) {
-                console.log('done triggered', msg)
+                console.log('done triggered', msg);
+                setFileSha(fileName, msg.commit.sha);
             }).fail(function (err) {
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             });
