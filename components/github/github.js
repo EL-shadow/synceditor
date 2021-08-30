@@ -189,7 +189,7 @@ var GitHubAPI = function ($, repo, popup) {
             })
             .then(function (data) {
                 console.log('>>>>', data);
-                that.setFileSha(fileName, data[0].sha);
+                that.setFileSha(fileName, data.sha);
             }, function () {
                 popup('Failed to load ' + url, 'danger');
 
