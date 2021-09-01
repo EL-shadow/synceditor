@@ -185,11 +185,14 @@ var GitHubAPI = function ($, repo, popup) {
                     }
                 })
             }, function (err) {
+console.log(err)
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             })
             .then(function (data) {
+console.log(data)
                 that.setFileSha(fileName, data.sha);
-            }, function () {
+            }, function (err) {
+console.log(err)
                 popup('Failed to load ' + url, 'danger');
             });
     }
