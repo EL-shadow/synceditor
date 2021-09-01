@@ -2,13 +2,17 @@
  * Created by Elnur Kurtaliev on 2018-12-13.
  */
 
-var SE = function ($) {
+var SE = function ($, config) {
     var alertPopup = new AlertPopup();
     var popup = alertPopup.alert.bind(alertPopup);
-    var ghAPI = new GitHubAPI($, popup)
-    var loadButton = '#load';
+    var ghAPI = new GitHubAPI($, config.repo, popup)
     var loadUrl = '#url';
+    var authButton = '#authButton';
     var saveButton = '#saveButton';
+    var authModal = '#authModal';
+    var branchInput = '#branch';
+    var pathInput = '#path';
+    var filenameInput = '#filename';
 
     /**
      * @typedef {number} SyncState
@@ -31,6 +35,8 @@ var SE = function ($) {
     * */
     // https://developer.github.com/v3/repos/contents/#example-for-updating-a-file
 
+    this._config = config;
+
     this._texts = {};
 
     this._lines = [];
@@ -40,15 +46,27 @@ var SE = function ($) {
     this._longerLangLength = 0;
 
     this.getTexts = function() {
-        var url = $(loadUrl).val();
+        var branch = $(branchInput).val();
+        var path = $(pathInput).val();
+        var baseFileName = $(filenameInput).val();
 
-        if (!url) {
-            popup('Ошибка: не введен адрес для загрузки!','danger');
+        if (!branch) {
+            popup('Error: Specify a branch.', 'danger');
             return;
         }
 
-        ghAPI
-            .checkoutTexts(url)
+        if (!path) {
+            popup('Error: Specify a path to documents.', 'danger');
+            return;
+        }
+
+        if (!baseFileName) {
+            popup('Error: Specify a filename of documents without extensions.', 'danger');
+            return;
+        }
+
+        return ghAPI
+            .checkoutTexts(branch, path, baseFileName)
             .done(function (filesContent) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
@@ -185,8 +203,8 @@ var SE = function ($) {
     this.parseRawTexts = function () {
         var longerLangLength = 0;
 
-        this._lines = Object.keys(this._texts).map(function (lang) {
-            var arr = [lang].concat(this._texts[lang].split('\n'));
+        this._lines = Object.keys(this._texts).map(function (fileName) {
+            var arr = [fileName].concat(this._texts[fileName].split('\n'));
             longerLangLength = arr.length > longerLangLength ? arr.length : longerLangLength;
 
             return arr;
@@ -199,6 +217,28 @@ var SE = function ($) {
         });
 
         this._longerLangLength = longerLangLength;
+    };
+
+    this.linesToText = function (fileName) {
+        var lines = null;
+
+        for (let i = 0; i < this._lines.length; i++) {
+            if (this._lines[i][0] === fileName) {
+                lines = this._lines[i].slice(1);
+                break;
+            }
+        }
+        if (lines === null) {
+            return false;
+        }
+
+        var text = lines.join('\n');
+        if (text.localeCompare(this._texts[fileName]) !== 0) {
+            this._texts[fileName] = text;
+            return true;
+        }
+
+        return false;
     };
 
     this.updateLine = function(lang, line, newText) {
@@ -250,32 +290,57 @@ var SE = function ($) {
 
     //-----------------
 
-    $(loadButton).on('click', function () {
+    $(document).ready(function($) {
+        var url = new URL(window.location.toString());
+
+        if (!localStorage.getItem('token')) {
+            $(authModal).modal('show');
+            return
+        }
+
+        $(branchInput).val(url.searchParams.get('branch'));
+        $(pathInput).val(url.searchParams.get('path'));
+        $(filenameInput).val(url.searchParams.get('filename'));
+
+        this.getUser();
         this.getTexts();
     }.bind(this));
 
+    $(authButton).on('click', function () {
+        var url = new URL(window.location.toString());
+        var redirectUri = this._config.callbackUri + "?redir=" + encodeURIComponent(url.toString());
+        location.href = "https://github.com/login/oauth/authorize?client_id=" + this._config.clientId
+            + "&scope=repo&redirect_uri=" + encodeURIComponent(redirectUri);
+    }.bind(this));
+
     $(saveButton).on('click', function () {
+        $(saveButton).prop('disabled', true);
+
+        var that = this;
         var dfd = $.Deferred(),  // Master deferred
             dfdNext = dfd;
-        var texts = this._texts;
 
-        ghAPI
-            .createBranch()
-            .then(function (branch) {
-                var branchName = branch.ref.substr('refs/heads/'.length);
-                Object.keys(texts).forEach(function (fileName) {
-                    dfdNext = dfdNext.pipe(function () {
-                        return ghAPI.pushCommit(texts[fileName], fileName, branchName);
-                    });
-                });
-                dfdNext.then(function () {
-                    popup('success')
-                }, function () {
-                    popup('fail', 'danger')
-                });
+        var url = new URL(window.location.toString());
+        var branchName = url.searchParams.get('branch');
 
-                dfd.resolve();
+        Object.keys(that._texts).forEach(function (fileName) {
+            dfdNext = dfdNext.pipe(function () {
+                var changed = that.linesToText(fileName);
+                if (!changed) {
+                    return Promise.resolve();
+                }
+                return ghAPI.pushCommit(that._texts[fileName], fileName, branchName);
             });
+        });
+        dfdNext.then(function () {
+            popup('success');
+            $(saveButton).prop('disabled', false);
+        }, function () {
+            popup('fail', 'danger');
+            $(saveButton).prop('disabled', false);
+        });
+
+        dfd.resolve();
     }.bind(this));
 
     $(document).on('keyup', '.line-text', function(e) {
@@ -332,7 +397,7 @@ var SE = function ($) {
             .done(function (userData) {
                 var userName = userData.name;
                 var login = userData.login;
-                var avatar = userData.avatar_url + '&s=48';
+                var avatar = userData.avatar_url + '&s=24';
                 $('.pane-info__avatar').html('<img src="' + avatar + '">');
                 $('.pane-info__username').text(userName + ' (' + login + ')');
                 popup('Вы авторизованы', 'success');
@@ -346,6 +411,10 @@ var SE = function ($) {
     // TODO: удалить - это для дебага
     this._setToken = function (token) {
         ghAPI._currentToken = token;
+    }
+
+    this._getToken = function () {
+        return ghAPI._currentToken;
     }
 
     this._getGhApi = function () {
