@@ -145,12 +145,14 @@ var GitHubAPI = function ($, repo, popup) {
      *
      * @param {string} content - текст который пушим
      * @param {string} filePath - путь к файлу в который коммитим
-     * @param {string} branchName - имя будущей ветки
+     * @param {string} branchName - имя ветки
      * @param {string} parentCommit - sha хеш от какого коммита вносятся изменения в файл
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
     this.pushCommit = function (content, fileName, branchName) {
         var that = this;
+        var token = this._currentToken;
+        var filePath = this._files[fileName].path;
         var fileSha = this._files[fileName].sha;
         var post = {
             message: 'Sync ' + fileName,
@@ -158,11 +160,8 @@ var GitHubAPI = function ($, repo, popup) {
             content: this.textToBase64(content),
             sha: fileSha
         };
-        var token = this._currentToken;
-        var filePath = this._files[fileName].path;
 
         // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
-console.log('PUT https://api.github.com/repos/' + that._repo + '/contents/' + filePath, post);
         return $
             .ajax({
                 method: 'PUT',
@@ -174,28 +173,13 @@ console.log('PUT https://api.github.com/repos/' + that._repo + '/contents/' + fi
                 },
                 data: JSON.stringify(post)
             })
-            .then(function (msg) {
-                console.log('done triggered', msg);
-console.log('GET https://api.github.com/repos/' + that._repo + '/contents/' + filePath + '?ref=' + branchName);
-                return $.ajax({
-                    method: "GET",
-                    url: 'https://api.github.com/repos/' + that._repo + '/contents/' + filePath + '?ref=' + branchName,
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader('Accept', null);
-                        xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-                        xhr.setRequestHeader('Authorization', 'token ' + token);
-                    }
-                })
-            }, function (err) {
-console.log(err);
-                popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
-            })
             .then(function (data) {
-console.log(data);
-                that.setFileSha(fileName, data.sha);
+                console.log('Commit saved', data);
+                that.setFileSha(fileName, data.content.sha);
+                return data;
             }, function (err) {
-console.log(err);
-                popup('Failed to load ' + url, 'danger');
+                console.log(err);
+                popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             });
     }
 
