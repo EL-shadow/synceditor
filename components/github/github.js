@@ -162,6 +162,7 @@ var GitHubAPI = function ($, repo, popup) {
         var filePath = this._files[fileName].path;
 
         // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
+console.log('PUT https://api.github.com/repos/' + that._repo + '/contents/' + filePath, post);
         return $
             .ajax({
                 method: 'PUT',
@@ -175,6 +176,7 @@ var GitHubAPI = function ($, repo, popup) {
             })
             .then(function (msg) {
                 console.log('done triggered', msg);
+console.log('GET https://api.github.com/repos/' + that._repo + '/contents/' + filePath + '?ref=' + branchName);
                 return $.ajax({
                     method: "GET",
                     url: 'https://api.github.com/repos/' + that._repo + '/contents/' + filePath + '?ref=' + branchName,
@@ -185,14 +187,14 @@ var GitHubAPI = function ($, repo, popup) {
                     }
                 })
             }, function (err) {
-console.log(err)
+console.log(err);
                 popup('Не удалось отправить изменения в файле ' + filePath + ' Ошибка:' + err, 'danger');
             })
             .then(function (data) {
-console.log(data)
+console.log(data);
                 that.setFileSha(fileName, data.sha);
             }, function (err) {
-console.log(err)
+console.log(err);
                 popup('Failed to load ' + url, 'danger');
             });
     }
