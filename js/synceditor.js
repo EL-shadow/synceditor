@@ -66,7 +66,7 @@ var SE = function ($, config) {
         }
 
         return ghAPI
-            .checkoutTexts(branch, path, baseFileName)
+            .checkoutTexts(branch, path, baseFileName, this._config.proxyUri)
             .done(function (filesContent) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
@@ -395,11 +395,11 @@ var SE = function ($, config) {
         ghAPI
             .getUser()
             .done(function (userData) {
-                var userName = userData.name;
+                var userName = userData.name || '';
                 var login = userData.login;
                 var avatar = userData.avatar_url + '&s=24';
                 $('.pane-info__avatar').html('<img src="' + avatar + '">');
-                $('.pane-info__username').text(userName + ' (' + login + ')');
+                $('.pane-info__username').text(userName + ' (@' + login + ')');
                 popup('Вы авторизованы', 'success');
                 $('.pane-info__signed').show();
             })
