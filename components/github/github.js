@@ -22,7 +22,7 @@ var GitHubAPI = function ($, repo, popup) {
      * @param filename
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.checkoutTexts = function(branch, path, filename){
+    this.checkoutTexts = function(branch, path, filename, proxyUri){
         var textsLoading = $.Deferred();
         var ghAPIgetFile = this.getFile.bind(this);
 
@@ -35,7 +35,7 @@ var GitHubAPI = function ($, repo, popup) {
                 $.when.apply($, fileNames.map(function (fileName) {
                     var fileUrl = files[fileName];
 
-                    return ghAPIgetFile(fileUrl);
+                    return ghAPIgetFile(fileUrl, proxyUri);
                 })).done(function () {
                     if (fileNames.length !== arguments.length) {
                         textsLoading.reject('Ошибка загрузки файлов [ghAPI:checkoutTexts]');
@@ -77,7 +77,7 @@ var GitHubAPI = function ($, repo, popup) {
         popup('Загружается список переводов...', 'info');
         // https://docs.github.com/en/rest/reference/repos#get-repository-content
         return $.ajax({
-                method: "GET",
+                method: 'GET',
                 url: 'https://api.github.com/repos/' + this._repo + '/contents/' + path + '?ref=' + branch,
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader('Accept', null);
@@ -112,10 +112,12 @@ var GitHubAPI = function ($, repo, popup) {
             });
     };
 
-    this.getFile = function(fileURL) {
+    this.getFile = function(fileURL, proxyUri) {
+        if (proxyUri) {
+            return $.post(proxyUri, {url: fileURL, token: this._currentToken});
+        }
         var url = new URL(fileURL);
-        var token = this._currentToken;
-        url.password = token;
+        url.password = this._currentToken;
         return $.get(url.toString());
     };
 
