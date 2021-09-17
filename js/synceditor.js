@@ -398,7 +398,7 @@ var SE = function ($, config) {
                 var userName = userData.name || '';
                 var login = userData.login;
                 var avatar = userData.avatar_url + '&s=24';
-                $('.pane-info__avatar').html('<img src="' + avatar + '">');
+                $('.pane-info__avatar').html('<img src="' + avatar + '" class="pane-info__avatar_small">');
                 $('.pane-info__username').text(userName + ' (@' + login + ')');
                 popup('Вы авторизованы', 'success');
                 $('.pane-info__signed').show();

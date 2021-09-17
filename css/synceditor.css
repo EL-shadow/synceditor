@@ -92,6 +92,8 @@ tr:hover .line-num {
 .pane-info__avatar {
     float: left;
     margin-right: 8px;
+}
+.pane-info__avatar_small {
     width: 24px;
     height: 24px;
 }
