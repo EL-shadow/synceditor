@@ -375,10 +375,13 @@ var SE = function ($, config) {
         var langId = parseInt(domNode.dataset.langId, 10);
         var line = parseInt(domNode.dataset.line, 10);
         var updateView = false;
+        var updateFocus = false;
         var reuseLines = true;
         var focus = line;
         var focusPos = 0;
         var modifiedText = domNode.innerText;
+        var isCursorOnStart = pos === 0;
+        var isCusrosnOnEnd = pos === modifiedText.length;
 
         if (key !== 13) {
             // Firefox на нажатие пробела в конце строки в contenteditable добавляет \n
@@ -395,11 +398,12 @@ var SE = function ($, config) {
         if (key === 13) {
             updateView = true;
             focus += 1;
+            updateFocus = true;
         }
 
         // Если курсор в начале строки и нажали Backspace
         // То мердждим текущую строку с предыдущей
-        if (key === 8 && pos === 0) {
+        if (key === 8 && isCursorOnStart) {
             var mergedLinePos = this.mergeLineToPrev(langId, line);
             if (typeof mergedLinePos === 'number') {
                 updateView = true;
@@ -410,7 +414,7 @@ var SE = function ($, config) {
 
         // Если курсор в конце строки и нажали Del
         // То мердждим текущую строку со следующей
-        if (key === 46 && pos === modifiedText.length) {
+        if (key === 46 && isCusrosnOnEnd) {
             var mergedLinePos = this.mergeLineWithNext(langId, line);
             if (typeof mergedLinePos === 'number') {
                 updateView = true;
@@ -418,14 +422,38 @@ var SE = function ($, config) {
             }
         }
 
-        if (!updateView) {
-            return;
+        // <- 37; ^ 38; -> 39; ↓ 40
+        if (key === 37 && isCursorOnStart && this._lines[langId - 1] && focus < this._lines[langId -1].length){
+            langId-=1;
+            updateFocus = true;
+            focusPos = this._lines[langId][focus].length;
         }
 
-        this.render(reuseLines);
+        if (key === 39 && isCusrosnOnEnd && this._lines[langId + 1] && focus < this._lines[langId + 1].length){
+            langId+=1;
+            updateFocus = true;
+        }
+
+        if (key === 38 && isCursorOnStart && focus > 1){
+            focus-=1;
+            updateFocus = true;
+            focusPos = this._lines[langId][focus].length;
+        }
+
+        if (key === 40 && isCusrosnOnEnd && focus + 1 < this._lines[langId].length){
+            focus+=1;
+            updateFocus = true;
+        }
+
+        if (updateView) {
+            this.render(reuseLines);
+        }
 
         var editableCell = document.querySelector('#lang'+ langId + 'line' + focus);
-        editableCell.focus();
+
+        if (updateFocus || focusPos) {
+            editableCell.focus();
+        }
 
         if (focusPos && window.getSelection && document.createRange) {
             var range = document.createRange();
