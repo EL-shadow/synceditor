@@ -242,8 +242,12 @@ var SE = function ($, config) {
     };
 
     this.updateLine = function(lang, line, newText) {
-        if (typeof lang !== 'number' || typeof line !== 'number' || !newText) {
+        if (typeof lang !== 'number' || typeof line !== 'number') {
             return;
+        }
+
+        if (!newText || newText === '\n') {
+            newText = '';
         }
 
         if (newText.indexOf('\n') > -1) {
@@ -353,14 +357,27 @@ var SE = function ($, config) {
         var reuseLines = true;
         var focus = line;
         var focusPos = 0;
+        var modifiedText = domNode.innerText;
 
-        this.updateLine(langId, line, domNode.innerText);
+        if (key !== 13) {
+            // Firefox на нажатие пробела в конце строки в contenteditable добавляет \n
+            modifiedText = modifiedText.replace(/\n+/g,'');
+        }
 
+        // На любое нажатие клавиш обновляем содержимое ячейки из HTML в данные
+        this.updateLine(langId, line, modifiedText);
+
+        // Далее решаем нужно ли перерисовать
+        // Нужно учесть что подсветка не обновится пока не перерисуем.
+
+        // Если нажали Enter
         if (key === 13) {
             updateView = true;
             focus += 1;
         }
 
+        // Если курсор в начале строки и нажали Backspace
+        // То мердждим текущую строку с предыдущей
         if (key === 8 && pos === 0) {
             var mergedLinePos = this.mergeLineToPrev(langId, line);
             if (typeof mergedLinePos === 'number') {
