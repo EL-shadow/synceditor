@@ -89,6 +89,11 @@ tr:hover .line-num {
     background-color: #e6ffed;
 }
 
+.line-sync-not-match .line-text:focus,
+.line-sync-match .line-text:focus {
+    background-color: transparent;
+}
+
 .pane-info__avatar {
     float: left;
     margin-right: 8px;
