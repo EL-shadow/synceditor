@@ -286,6 +286,27 @@ var SE = function ($, config) {
         return false;
     };
 
+    this.mergeLineWithNext = function (langId, line) {
+        var lang = this._lines[langId];
+        var nextLine = line + 1;
+
+        // Проверяем что следующая строка существует
+        if (nextLine < lang.length) {
+            var newCursorPos = lang[line].length;
+            var mergedText = lang[line] + lang[nextLine];
+
+            lang.splice(line, 2, mergedText);
+
+            this.updateLongerLangLength();
+
+            this._linesWordCount[langId].splice(line, 2, this.getWordsCount(mergedText));
+
+            return newCursorPos;
+        }
+
+        return false;
+    };
+
     this.updateLongerLangLength = function () {
         this._longerLangLength = this._lines.reduce(function (longerLength, lang) {
             return lang.length > longerLength ? lang.length : longerLength;
@@ -385,7 +406,16 @@ var SE = function ($, config) {
                 focus -= 1;
                 focusPos = mergedLinePos;
             }
+        }
 
+        // Если курсор в конце строки и нажали Del
+        // То мердждим текущую строку со следующей
+        if (key === 46 && pos === modifiedText.length) {
+            var mergedLinePos = this.mergeLineWithNext(langId, line);
+            if (typeof mergedLinePos === 'number') {
+                updateView = true;
+                focusPos = mergedLinePos;
+            }
         }
 
         if (!updateView) {
