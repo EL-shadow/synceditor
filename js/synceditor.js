@@ -354,11 +354,13 @@ var SE = function ($, config) {
                 if (!changed) {
                     return Promise.resolve();
                 }
+
+                popup('Файл сохраняется, не закрывайте окно...');
                 return ghAPI.pushCommit(that._texts[fileName], fileName, branchName);
             });
         });
         dfdNext.then(function () {
-            popup('success');
+            popup('success', 'success');
             $(saveButton).prop('disabled', false);
         }, function () {
             popup('fail', 'danger');
