@@ -242,8 +242,12 @@ var SE = function ($, config) {
     };
 
     this.updateLine = function(lang, line, newText) {
-        if (typeof lang !== 'number' || typeof line !== 'number' || !newText) {
+        if (typeof lang !== 'number' || typeof line !== 'number') {
             return;
+        }
+
+        if (!newText || newText === '\n') {
+            newText = '';
         }
 
         if (newText.indexOf('\n') > -1) {
@@ -275,6 +279,27 @@ var SE = function ($, config) {
             this.updateLongerLangLength();
 
             this._linesWordCount[langId].splice(prevLine, 2, this.getWordsCount(mergedText));
+
+            return newCursorPos;
+        }
+
+        return false;
+    };
+
+    this.mergeLineWithNext = function (langId, line) {
+        var lang = this._lines[langId];
+        var nextLine = line + 1;
+
+        // Проверяем что следующая строка существует
+        if (nextLine < lang.length) {
+            var newCursorPos = lang[line].length;
+            var mergedText = lang[line] + lang[nextLine];
+
+            lang.splice(line, 2, mergedText);
+
+            this.updateLongerLangLength();
+
+            this._linesWordCount[langId].splice(line, 2, this.getWordsCount(mergedText));
 
             return newCursorPos;
         }
@@ -329,11 +354,13 @@ var SE = function ($, config) {
                 if (!changed) {
                     return Promise.resolve();
                 }
+
+                popup('Файл сохраняется, не закрывайте окно...');
                 return ghAPI.pushCommit(that._texts[fileName], fileName, branchName);
             });
         });
         dfdNext.then(function () {
-            popup('success');
+            popup('success', 'success');
             $(saveButton).prop('disabled', false);
         }, function () {
             popup('fail', 'danger');
@@ -350,35 +377,85 @@ var SE = function ($, config) {
         var langId = parseInt(domNode.dataset.langId, 10);
         var line = parseInt(domNode.dataset.line, 10);
         var updateView = false;
+        var updateFocus = false;
         var reuseLines = true;
         var focus = line;
         var focusPos = 0;
+        var modifiedText = domNode.innerText;
+        var isCursorOnStart = pos === 0;
+        var isCusrosnOnEnd = pos === modifiedText.length;
 
-        this.updateLine(langId, line, domNode.innerText);
+        if (key !== 13) {
+            // Firefox на нажатие пробела в конце строки в contenteditable добавляет \n
+            modifiedText = modifiedText.replace(/\n+/g,'');
+        }
 
+        // На любое нажатие клавиш обновляем содержимое ячейки из HTML в данные
+        this.updateLine(langId, line, modifiedText);
+
+        // Далее решаем нужно ли перерисовать
+        // Нужно учесть что подсветка не обновится пока не перерисуем.
+
+        // Если нажали Enter
         if (key === 13) {
             updateView = true;
             focus += 1;
+            updateFocus = true;
         }
 
-        if (key === 8 && pos === 0) {
+        // Если курсор в начале строки и нажали Backspace
+        // То мердждим текущую строку с предыдущей
+        if (key === 8 && isCursorOnStart) {
             var mergedLinePos = this.mergeLineToPrev(langId, line);
             if (typeof mergedLinePos === 'number') {
                 updateView = true;
                 focus -= 1;
                 focusPos = mergedLinePos;
             }
-
         }
 
-        if (!updateView) {
-            return;
+        // Если курсор в конце строки и нажали Del
+        // То мердждим текущую строку со следующей
+        if (key === 46 && isCusrosnOnEnd) {
+            var mergedLinePos = this.mergeLineWithNext(langId, line);
+            if (typeof mergedLinePos === 'number') {
+                updateView = true;
+                focusPos = mergedLinePos;
+            }
         }
 
-        this.render(reuseLines);
+        // <- 37; ^ 38; -> 39; ↓ 40
+        if (key === 37 && isCursorOnStart && this._lines[langId - 1] && focus < this._lines[langId -1].length){
+            langId-=1;
+            updateFocus = true;
+            focusPos = this._lines[langId][focus].length;
+        }
+
+        if (key === 39 && isCusrosnOnEnd && this._lines[langId + 1] && focus < this._lines[langId + 1].length){
+            langId+=1;
+            updateFocus = true;
+        }
+
+        if (key === 38 && isCursorOnStart && focus > 1){
+            focus-=1;
+            updateFocus = true;
+            focusPos = this._lines[langId][focus].length;
+        }
+
+        if (key === 40 && isCusrosnOnEnd && focus + 1 < this._lines[langId].length){
+            focus+=1;
+            updateFocus = true;
+        }
+
+        if (updateView) {
+            this.render(reuseLines);
+        }
 
         var editableCell = document.querySelector('#lang'+ langId + 'line' + focus);
-        editableCell.focus();
+
+        if (updateFocus || focusPos) {
+            editableCell.focus();
+        }
 
         if (focusPos && window.getSelection && document.createRange) {
             var range = document.createRange();
