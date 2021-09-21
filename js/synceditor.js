@@ -468,6 +468,22 @@ var SE = function ($, config) {
         }
     }.bind(this));
 
+    $(document).on('cut paste', '.line-text', function(e) {
+        var domNode = e.target;
+        var langId = parseInt(domNode.dataset.langId, 10);
+        var line = parseInt(domNode.dataset.line, 10);
+
+        // Откладываем обращение к DOM т.к. событие возникает до модификации текста.
+        setTimeout(function () {
+            var modifiedText = domNode.innerText;
+
+            modifiedText = modifiedText.replace(/\n+/g,'');
+
+            // На вставку и вырезание обновляем содержимое ячейки из HTML в данные
+            this.updateLine(langId, line, modifiedText);
+        }.bind(this), 0);
+    }.bind(this));
+
     this.getUser = function () {
         ghAPI
             .getUser()
