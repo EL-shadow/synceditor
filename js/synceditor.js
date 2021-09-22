@@ -313,6 +313,16 @@ var SE = function ($, config) {
         }, 0);
     };
 
+    this.updateOneLineStatus = function (domNode) {
+        var line = parseInt(domNode.dataset.line, 10);
+        var lineSyncMatch = this.getLineSync(line);
+        var rowClass = this.getLineSyncClassName(lineSyncMatch);
+
+        if (domNode.parentElement.className !== rowClass) {
+            domNode.parentElement.className = rowClass
+        }
+    };
+
     //-----------------
 
     $(document).ready(function($) {
@@ -466,6 +476,28 @@ var SE = function ($, config) {
             sel.addRange(range);
             editableCell.focus();
         }
+    }.bind(this));
+
+    $(document).on('cut paste', '.line-text', function(e) {
+        var domNode = e.target;
+        var langId = parseInt(domNode.dataset.langId, 10);
+        var line = parseInt(domNode.dataset.line, 10);
+
+        // Откладываем обращение к DOM т.к. событие возникает до модификации текста.
+        setTimeout(function () {
+            var modifiedText = domNode.innerText;
+
+            modifiedText = modifiedText.replace(/\n+/g,'');
+
+            // На вставку и вырезание обновляем содержимое ячейки из HTML в данные
+            this.updateLine(langId, line, modifiedText);
+        }.bind(this), 0);
+    }.bind(this));
+
+    $(document).on('focusout', '.line-text', function(e) {
+        var domNode = e.target;
+
+        this.updateOneLineStatus(domNode);
     }.bind(this));
 
     this.getUser = function () {
