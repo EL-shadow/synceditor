@@ -27,6 +27,13 @@ var SE = function ($, config) {
         MATCH: 1
     };
 
+    /**
+     * Количество символов в одной "странице"
+     * @constant
+     * @type {number}
+     */
+    var PAGE_TEXT_LENGTH = 1800;
+
     /*
     * https://developer.github.com/v3/repos/contents/#get-contents
     * $.get('https://api.github.com/repos/prosvita/QIRIMTATARTILI/contents/text/')
@@ -192,6 +199,7 @@ var SE = function ($, config) {
         }
 
         $(result).html(this.templateEditor2());
+        this.updatePagesCount();
     };
 
     this.getWordsCount = function (text) {
@@ -507,14 +515,27 @@ var SE = function ($, config) {
                 var userName = userData.name || '';
                 var login = userData.login;
                 var avatar = userData.avatar_url + '&s=24';
-                $('.pane-info__avatar').html('<img src="' + avatar + '" class="pane-info__avatar_small">');
-                $('.pane-info__username').text(userName + ' (@' + login + ')');
+                $('.user-info__avatar').html('<img src="' + avatar + '" class="user-info__avatar_small">');
+                $('.user-info__username').text(userName + ' (@' + login + ')');
                 popup('Вы авторизованы', 'success');
-                $('.pane-info__signed').show();
+                $('.user-info__signed').addClass('user-info__signed_enabled');
             })
             .fail(function () {
-                $('.pane-info__notsigned').show();
+                popup('Не удалось авторизоваться.', 'danger');
             })
+    };
+
+    this.updatePagesCount = function () {
+        $('.page-info__counter').text(this.getPagesCount());
+    };
+
+    this.getPagesCount = function() {
+        var textTotalLength = this._lines.reduce(function (columnCount, column) {
+            return columnCount + column.reduce(function(count, line) {return count + line.length}, 0);
+        }, 0);
+
+        var pages = textTotalLength / PAGE_TEXT_LENGTH;
+        return Math.round(pages * 100) / 100;
     };
 
     // TODO: удалить - это для дебага
