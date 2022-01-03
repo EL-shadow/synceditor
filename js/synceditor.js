@@ -465,7 +465,7 @@ var SE = function ($, config) {
         var focusPos = 0;
         var modifiedText = domNode.innerText;
         var isCursorOnStart = pos === 0;
-        var isCusrosnOnEnd = pos === modifiedText.length;
+        var isCursorOnEnd = pos === modifiedText.length;
 
         if (key !== 13) {
             // Firefox на нажатие пробела в конце строки в contenteditable добавляет \n
@@ -493,16 +493,18 @@ var SE = function ($, config) {
                 updateView = true;
                 focus -= 1;
                 focusPos = mergedLinePos;
+                updateFocus = true;
             }
         }
 
         // Если курсор в конце строки и нажали Del
         // То мердждим текущую строку со следующей
-        if (key === 46 && isCusrosnOnEnd) {
+        if (key === 46 && isCursorOnEnd) {
             var mergedLinePos = this.mergeLineWithNext(langId, line);
             if (typeof mergedLinePos === 'number') {
                 updateView = true;
                 focusPos = mergedLinePos;
+                updateFocus = true;
             }
         }
 
@@ -513,7 +515,7 @@ var SE = function ($, config) {
             focusPos = this._lines[langId][focus].length;
         }
 
-        if (key === 39 && isCusrosnOnEnd && this._lines[langId + 1] && focus < this._lines[langId + 1].length){
+        if (key === 39 && isCursorOnEnd && this._lines[langId + 1] && focus < this._lines[langId + 1].length){
             langId+=1;
             updateFocus = true;
         }
@@ -524,7 +526,7 @@ var SE = function ($, config) {
             focusPos = this._lines[langId][focus].length;
         }
 
-        if (key === 40 && isCusrosnOnEnd && focus + 1 < this._lines[langId].length){
+        if (key === 40 && isCursorOnEnd && focus + 1 < this._lines[langId].length){
             focus+=1;
             updateFocus = true;
         }
