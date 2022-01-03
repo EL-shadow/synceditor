@@ -465,7 +465,7 @@ var SE = function ($, config) {
         var focusPos = 0;
         var modifiedText = domNode.innerText;
         var isCursorOnStart = pos === 0;
-        var isCursorOnEnd = pos === modifiedText.length;
+        var isCursorOnEnd = pos === modifiedText.length || modifiedText === '\n';
 
         if (key !== 13) {
             // Firefox на нажатие пробела в конце строки в contenteditable добавляет \n
