@@ -33,11 +33,16 @@
     background-color: #fafbfc;
 }
 
-#result {
+.result {
     width: 1000px;
     margin: 0 auto;
     border-radius: 3px;
     border: 1px solid #ddd;
+}
+
+.result_wide {
+    width: calc(100% - 16px);
+    margin: 0 8px;
 }
 
 .se-table {
@@ -56,6 +61,21 @@
     font-weight: normal;
     height: 32px;
     padding: 5px 10px;
+    -ms-word-break: break-word;
+    word-break: break-word;
+    width: 50%;
+}
+
+.result_columns_3 .se-table thead th {
+    width: 33.33%
+}
+
+.result_columns_4 .se-table thead th {
+    width: 25%
+}
+
+.result_columns_5 .se-table thead th {
+    width: 20%
 }
 
 .se-table thead .column-1,
@@ -87,6 +107,10 @@ tr:hover .line-num {
 }
 .line-sync-match .line-text {
     background-color: #e6ffed;
+}
+.line-sync-match .empty-row,
+.line-sync-not-match .empty-row {
+    background-color: #fafbfc;
 }
 
 .line-sync-not-match .line-text:focus,
