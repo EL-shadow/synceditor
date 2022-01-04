@@ -5,7 +5,7 @@
 var SE = function ($, config) {
     var alertPopup = new AlertPopup();
     var popup = alertPopup.alert.bind(alertPopup);
-    var ghAPI = new GitHubAPI($, config.repo, popup)
+    var ghAPI = new GitHubAPI($, config.repo, popup);
     var loadUrl = '#url';
     var authButton = '#authButton';
     var saveButton = '#saveButton';
@@ -13,6 +13,8 @@ var SE = function ($, config) {
     var branchInput = '#branch';
     var pathInput = '#path';
     var filenameInput = '#filename';
+    // блоки по id и так доступны в глобальной области видимости, но лучше задекларировать для IDE
+    var result = '#result';
 
     /**
      * @typedef {number} SyncState
@@ -33,6 +35,13 @@ var SE = function ($, config) {
      * @type {number}
      */
     var PAGE_TEXT_LENGTH = 1800;
+
+    /**
+     * Лимит отношения количества слов, по которому подсвечиваем не совпадение переводов
+     * @constant
+     * @type {number}
+     */
+    var WORDS_DIFF_COUNT_LIMIT = 2;
 
     /*
     * https://developer.github.com/v3/repos/contents/#get-contents
@@ -79,6 +88,12 @@ var SE = function ($, config) {
                 popup('Все тексты загружены', 'success');
                 this.render();
                 $('.action-pane').show();
+                if (this._lines.length > 2) {
+                    $(result).addClass([
+                        'result_wide',
+                        'result_columns_' + this._lines.length
+                    ]);
+                }
             }.bind(this))
             .fail(function (message) {
                 popup(message, 'danger');
@@ -86,29 +101,71 @@ var SE = function ($, config) {
     };
 
     /**
-     * Проверяет совпадение двух строк из переводов
+     * Проверяет совпадение строки в каждом языке переводов
      *
      * @param {Number} lineId
      * @returns {SyncState}
      */
     this.getLineSync = function (lineId) {
+        if (this._lines.length === 2) {
+            return this._compareItems(lineId, 1);
+        }
+
+        var allLinesMatch = 0;
+
+        for (var x = 1; x < this._lines.length; x++) {
+            var itemRes = this._compareItems(lineId, x);
+            if (itemRes === SYNC.NOT_MATCH) {
+                return SYNC.NOT_MATCH;
+            }
+            allLinesMatch += itemRes;
+        }
+
+        if (allLinesMatch === SYNC.NORMAL) {
+            return SYNC.NORMAL;
+        }
+
+        if (allLinesMatch === this._lines.length - 1) {
+            return SYNC.MATCH;
+        }
+
+        return SYNC.NOT_MATCH;
+    };
+
+    /**
+     * Проверяет совпадение двух строк из переводов
+     *
+     * @param {Number} lineId - номер строки для сравнения текстов
+     * @param {Number} column - номер столбца с которым сравниваем текст из первого столбца
+     * @returns {SyncState}
+     */
+    this._compareItems = function (lineId, column) {
+        if (lineId >= this._lines[0].length || lineId >= this._lines[column].length) {
+            return SYNC.NOT_MATCH;
+        }
+
         var line0 = this._lines[0][lineId];
-        var line1 = this._lines[1][lineId];
+        var line1 = this._lines[column][lineId];
+
         if (line0 === line1) {
             return SYNC.MATCH;
         }
 
-        /**
-         * Задаем правило что если количество слов отличается больше чем лимит то перевод не соответствует
-         * @constant
-         * @type {number}
-         */
-        var WORDS_DIFF_COUNT_LIMIT = 2;
         var line0wordsCount = this._linesWordCount[0][lineId];
-        var line1wordsCount = this._linesWordCount[1][lineId];
+        var line1wordsCount = this._linesWordCount[column][lineId];
+
+        if (line0wordsCount === 0 && line1wordsCount === 0) {
+            return SYNC.MATCH;
+        }
+
+        if (line0wordsCount === 0 || line1wordsCount === 0) {
+            return SYNC.NOT_MATCH;
+        }
+
         var countDiff = line0wordsCount > line1wordsCount ?
             line0wordsCount / line1wordsCount :
             line1wordsCount / line0wordsCount;
+
         if (countDiff >= WORDS_DIFF_COUNT_LIMIT) {
             return SYNC.NOT_MATCH;
         }
@@ -203,6 +260,10 @@ var SE = function ($, config) {
     };
 
     this.getWordsCount = function (text) {
+        if (text === '' || text === '\n') {
+            return 0;
+        }
+
         var wordDelimiter = ' ';
 
         return text.split(wordDelimiter).length;
@@ -331,7 +392,7 @@ var SE = function ($, config) {
         }
     };
 
-    //-----------------
+    //-----------------------------------------------------------
 
     $(document).ready(function($) {
         var url = new URL(window.location.toString());
@@ -348,6 +409,9 @@ var SE = function ($, config) {
         this.getUser();
         this.getTexts();
     }.bind(this));
+
+
+    //-----------------------------------------------------------
 
     $(authButton).on('click', function () {
         var url = new URL(window.location.toString());
@@ -541,11 +605,11 @@ var SE = function ($, config) {
     // TODO: удалить - это для дебага
     this._setToken = function (token) {
         ghAPI._currentToken = token;
-    }
+    };
 
     this._getToken = function () {
         return ghAPI._currentToken;
-    }
+    };
 
     this._getGhApi = function () {
         return ghAPI;
