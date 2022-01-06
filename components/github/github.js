@@ -45,7 +45,7 @@ var GitHubAPI = function ($, repo, popup) {
                     var allFiles = Array.prototype.reduce.call(arguments, function (allFilesContent, fileContent, index) {
                         var fileName = fileNames[index];
 
-                        allFilesContent[fileName] = fileContent[0];
+                        allFilesContent[fileName] = fileContent;
 
                         return allFilesContent;
                     }, {});
@@ -96,7 +96,7 @@ var GitHubAPI = function ($, repo, popup) {
                             return item.type === 'file' && item.name.indexOf(filename + '.') === 0
                         })
                         .reduce(function (acc, file) {
-                            acc[file.name] = file.download_url;
+                            acc[file.name] = file.git_url;
                             setFileSha(file.name, file.sha);
                             setFilePath(file.name, file.path);
                             return acc;
@@ -107,18 +107,31 @@ var GitHubAPI = function ($, repo, popup) {
 
                     return files;
                 }
-            }, function () {
-                popup('Не удалось загрузить ' + url, 'danger');
+            }, function (error) {
+                console.error(error);
+                popup(error.responseJSON.message, 'danger');
             });
     };
 
     this.getFile = function(fileURL, proxyUri) {
-        if (proxyUri) {
-            return $.post(proxyUri, {url: fileURL, token: this._currentToken});
-        }
-        var url = new URL(fileURL);
-        url.password = this._currentToken;
-        return $.get(url.toString());
+        var token = this._currentToken;
+
+        return $.ajax({
+                method: 'GET',
+                url: fileURL,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', null);
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
+                }
+            })
+            .then(function (data) {
+                return decodeURIComponent(escape(window.atob(data.content)));
+            }, function (error) {
+                console.error(error);
+                popup(error.responseJSON.message, 'danger');
+                throw new Error(error.responseJSON.message);
+            });
     };
 
     this.setFileSha = function (fileName, fileSha) {
