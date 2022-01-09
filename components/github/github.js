@@ -115,6 +115,7 @@ var GitHubAPI = function ($, repo, popup) {
 
     this.getFile = function(fileURL) {
         var token = this._currentToken;
+        var that = this;
 
         return $.ajax({
                 method: 'GET',
@@ -126,7 +127,7 @@ var GitHubAPI = function ($, repo, popup) {
                 }
             })
             .then(function (data) {
-                return this.base64ToText(data.content);
+                return that.base64ToText(data.content);
             }, function (error) {
                 console.error(error);
                 popup(error.responseJSON.message, 'danger');
