@@ -82,7 +82,7 @@ var SE = function ($, config) {
         }
 
         return ghAPI
-            .checkoutTexts(branch, path, baseFileName, this._config.proxyUri)
+            .checkoutTexts(branch, path, baseFileName)
             .done(function (filesContent) {
                 this._texts = filesContent;
                 popup('Все тексты загружены', 'success');
