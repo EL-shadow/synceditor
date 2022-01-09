@@ -22,7 +22,7 @@ var GitHubAPI = function ($, repo, popup) {
      * @param filename
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.checkoutTexts = function(branch, path, filename, proxyUri){
+    this.checkoutTexts = function(branch, path, filename){
         var textsLoading = $.Deferred();
         var ghAPIgetFile = this.getFile.bind(this);
 
@@ -35,7 +35,7 @@ var GitHubAPI = function ($, repo, popup) {
                 $.when.apply($, fileNames.map(function (fileName) {
                     var fileUrl = files[fileName];
 
-                    return ghAPIgetFile(fileUrl, proxyUri);
+                    return ghAPIgetFile(fileUrl);
                 })).done(function () {
                     if (fileNames.length !== arguments.length) {
                         textsLoading.reject('Ошибка загрузки файлов [ghAPI:checkoutTexts]');
@@ -113,7 +113,7 @@ var GitHubAPI = function ($, repo, popup) {
             });
     };
 
-    this.getFile = function(fileURL, proxyUri) {
+    this.getFile = function(fileURL) {
         var token = this._currentToken;
 
         return $.ajax({
@@ -126,7 +126,7 @@ var GitHubAPI = function ($, repo, popup) {
                 }
             })
             .then(function (data) {
-                return decodeURIComponent(escape(window.atob(data.content)));
+                return this.base64ToText(data.content);
             }, function (error) {
                 console.error(error);
                 popup(error.responseJSON.message, 'danger');
@@ -152,6 +152,15 @@ var GitHubAPI = function ($, repo, popup) {
      */
     this.textToBase64 = function (text) {
         return btoa(unescape(encodeURIComponent(text)));
+    }
+
+    /**
+     * Возвращает Unicode текст полученьій из текста в формате base64
+     * @param {string} text - текст в формате base64
+     * @returns {string}
+     */
+    this.base64ToText = function (text) {
+        return decodeURIComponent(escape(window.atob(text)));
     }
 
     /**
