@@ -61,6 +61,8 @@ var SE = function ($, config) {
 
     this._longerLangLength = 0;
 
+    this._sourceEol = {};
+
     this.getTexts = function() {
         var branch = $(branchInput).val();
         var path = $(pathInput).val();
@@ -273,7 +275,14 @@ var SE = function ($, config) {
         var longerLangLength = 0;
 
         this._lines = Object.keys(this._texts).map(function (fileName) {
-            var arr = [fileName].concat(this._texts[fileName].split('\n'));
+            var rawText = this._texts[fileName];
+            
+            if (rawText.indexOf('\r\n') > -1) {
+                rawText = rawText.replace(/\r/g, '');
+                this._sourceEol[fileName] = '\r\n';
+            }
+
+            var arr = [fileName].concat(rawText.split('\n'));
             longerLangLength = arr.length > longerLangLength ? arr.length : longerLangLength;
 
             return arr;
@@ -301,7 +310,7 @@ var SE = function ($, config) {
             return false;
         }
 
-        var text = lines.join('\n');
+        var text = lines.join(this._sourceEol[fileName] || '\n');
         if (text.localeCompare(this._texts[fileName]) !== 0) {
             this._texts[fileName] = text;
             return true;
