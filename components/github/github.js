@@ -22,7 +22,7 @@ var GitHubAPI = function ($, repo, popup) {
      * @param filename
      * @returns {*|PromiseLike<T>|Promise<T>}
      */
-    this.checkoutTexts = function(branch, path, filename, proxyUri){
+    this.checkoutTexts = function(branch, path, filename){
         var textsLoading = $.Deferred();
         var ghAPIgetFile = this.getFile.bind(this);
 
@@ -35,7 +35,7 @@ var GitHubAPI = function ($, repo, popup) {
                 $.when.apply($, fileNames.map(function (fileName) {
                     var fileUrl = files[fileName];
 
-                    return ghAPIgetFile(fileUrl, proxyUri);
+                    return ghAPIgetFile(fileUrl);
                 })).done(function () {
                     if (fileNames.length !== arguments.length) {
                         textsLoading.reject('Ошибка загрузки файлов [ghAPI:checkoutTexts]');
@@ -45,7 +45,7 @@ var GitHubAPI = function ($, repo, popup) {
                     var allFiles = Array.prototype.reduce.call(arguments, function (allFilesContent, fileContent, index) {
                         var fileName = fileNames[index];
 
-                        allFilesContent[fileName] = fileContent[0];
+                        allFilesContent[fileName] = fileContent;
 
                         return allFilesContent;
                     }, {});
@@ -96,7 +96,7 @@ var GitHubAPI = function ($, repo, popup) {
                             return item.type === 'file' && item.name.indexOf(filename + '.') === 0
                         })
                         .reduce(function (acc, file) {
-                            acc[file.name] = file.download_url;
+                            acc[file.name] = file.git_url;
                             setFileSha(file.name, file.sha);
                             setFilePath(file.name, file.path);
                             return acc;
@@ -107,18 +107,32 @@ var GitHubAPI = function ($, repo, popup) {
 
                     return files;
                 }
-            }, function () {
-                popup('Не удалось загрузить ' + url, 'danger');
+            }, function (error) {
+                console.error(error);
+                popup(error.responseJSON.message, 'danger');
             });
     };
 
-    this.getFile = function(fileURL, proxyUri) {
-        if (proxyUri) {
-            return $.post(proxyUri, {url: fileURL, token: this._currentToken});
-        }
-        var url = new URL(fileURL);
-        url.password = this._currentToken;
-        return $.get(url.toString());
+    this.getFile = function(fileURL) {
+        var token = this._currentToken;
+        var that = this;
+
+        return $.ajax({
+                method: 'GET',
+                url: fileURL,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Accept', null);
+                    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+                    xhr.setRequestHeader('Authorization', 'token ' + token);
+                }
+            })
+            .then(function (data) {
+                return that.base64ToText(data.content);
+            }, function (error) {
+                console.error(error);
+                popup(error.responseJSON.message, 'danger');
+                throw new Error(error.responseJSON.message);
+            });
     };
 
     this.setFileSha = function (fileName, fileSha) {
@@ -139,6 +153,15 @@ var GitHubAPI = function ($, repo, popup) {
      */
     this.textToBase64 = function (text) {
         return btoa(unescape(encodeURIComponent(text)));
+    }
+
+    /**
+     * Возвращает Unicode текст полученьій из текста в формате base64
+     * @param {string} text - текст в формате base64
+     * @returns {string}
+     */
+    this.base64ToText = function (text) {
+        return decodeURIComponent(escape(window.atob(text)));
     }
 
     /**
